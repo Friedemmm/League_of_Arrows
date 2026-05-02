@@ -1,55 +1,39 @@
 package com.backend.LeagueOfArrows.repositories;
 
 import com.backend.LeagueOfArrows.entities.UserEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class UserRepository {
 
     private final JdbcTemplate jdbc;
 
-    public UserRepository(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
-    }
 
-    private final RowMapper<UserEntity> mapper = (rs, n) -> new UserEntity(
-            rs.getLong("id_usuario"),
-            rs.getString("email"),
-            rs.getString("contrasena"),
-            rs.getString("rol")
-    );
+    private final RowMapper<UserEntity> userRowMapper = (rs, rowNum) -> {
+        UserEntity user = new UserEntity();
+        user.setUserId(rs.getLong("id_usuario"));
+        user.setEmail(rs.getString("email"));
+        user.setPassword(rs.getString("contrasena"));
+        user.setRol(rs.getString("rol"));
+        return user;
+    };
 
+    // Busca usuario por email, si no encuentra devuelve Optional.empty()
     public Optional<UserEntity> findByEmail(String email) {
-        String sql = "SELECT id_usuario, email, contrasena, rol FROM usuario WHERE email = ?";
-        List<UserEntity> result = jdbc.query(sql, mapper, email);
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+        var list = jdbc.query("SELECT * FROM usuario WHERE email = ?", userRowMapper, email);
+        return list.stream().findFirst();
     }
 
-    public Optional<UserEntity> findById(Long id) {
-        String sql = "SELECT id_usuario, email, contrasena, rol FROM usuario WHERE id_usuario = ?";
-        List<UserEntity> result = jdbc.query(sql, mapper, id);
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+    // Guarda un nuevo usuario en la base de datos
+    public long saveUser(String email, String password, String role) {
+        return jdbc.queryForObject("INSERT INTO usuario (email, contrasena, rol) VALUES (?, ?, ?) RETURNING id_usuario", Long.class, email, password, role);
     }
 
-    public UserEntity save(UserEntity u) {
-        String sql = "INSERT INTO usuario (email, contrasena, rol) VALUES (?, ?, ?)";
-        KeyHolder kh = new GeneratedKeyHolder();
-        jdbc.update(con -> {
-            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id_usuario"});
-            ps.setString(1, u.getEmail());
-            ps.setString(2, u.getPassword());
-            ps.setString(3, u.getRol());
-            return ps;
-        }, kh);
-        u.setUserId(kh.getKey().longValue());
-        return u;
-    }
+
 }

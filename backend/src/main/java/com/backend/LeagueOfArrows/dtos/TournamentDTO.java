@@ -8,5 +8,5 @@ public class TournamentDTO {
     private Long categoryId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private boolean isActive;
+    private Boolean active;
 }

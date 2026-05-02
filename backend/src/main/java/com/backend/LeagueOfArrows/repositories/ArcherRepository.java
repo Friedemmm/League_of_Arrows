@@ -1,67 +1,48 @@
 package com.backend.LeagueOfArrows.repositories;
 
 import com.backend.LeagueOfArrows.entities.ArcherEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-
-import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class ArcherRepository {
 
     private final JdbcTemplate jdbc;
 
-    public ArcherRepository(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
-    }
-
-    private final RowMapper<ArcherEntity> mapper = (rs, n) -> new ArcherEntity(
-            rs.getLong("id_arquero"),
-            rs.getLong("id_usuario"),
-            rs.getString("nombre")
-    );
+    private final RowMapper<ArcherEntity> archerRowMapper = (rs, n) -> {
+        ArcherEntity archer = new ArcherEntity();
+        archer.setArcherId(rs.getLong("id_arquero"));
+        archer.setUserId(rs.getLong("id_usuario"));
+        archer.setName(rs.getString("nombre"));
+        return archer;
+    };
 
     public List<ArcherEntity> findAll() {
         return jdbc.query(
-                "SELECT id_arquero, id_usuario, nombre FROM arquero", mapper);
+                "SELECT * FROM arquero", archerRowMapper);
     }
+
 
     public Optional<ArcherEntity> findById(Long id) {
-        List<ArcherEntity> result = jdbc.query(
-                "SELECT id_arquero, id_usuario, nombre FROM arquero WHERE id_arquero = ?",
-                mapper, id);
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+        var list = jdbc.query("SELECT * FROM arquero WHERE id_arquero = ?", archerRowMapper, id);
+        return list.stream().findFirst();
     }
 
-    public Optional<ArcherEntity> findByUserId(Long userId) {
-        List<ArcherEntity> result = jdbc.query(
-                "SELECT id_arquero, id_usuario, nombre FROM arquero WHERE id_usuario = ?",
-                mapper, userId);
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+
+    public Long save(Long userId, String name) {
+        return jdbc.queryForObject("INSERT INTO arquero (id_usuario, nombre) VALUES (?, ?) RETURNING id_arquero", Long.class, userId, name);
     }
 
-    public ArcherEntity save(ArcherEntity a) {
-        String sql = "INSERT INTO arquero (id_usuario, nombre) VALUES (?, ?)";
-        KeyHolder kh = new GeneratedKeyHolder();
-        jdbc.update(con -> {
-            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id_arquero"});
-            ps.setLong(1, a.getUserId());
-            ps.setString(2, a.getName());
-            return ps;
-        }, kh);
-        a.setArcherId(kh.getKey().longValue());
-        return a;
-    }
 
-    public int update(ArcherEntity a) {
+    public int update(Long id, String name) {
         return jdbc.update(
                 "UPDATE arquero SET nombre = ? WHERE id_arquero = ?",
-                a.getName(), a.getArcherId());
+                 name,id);
     }
 
     public int deleteById(Long id) {
