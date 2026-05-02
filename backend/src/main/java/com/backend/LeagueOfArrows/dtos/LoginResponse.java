@@ -1,17 +1,13 @@
 package com.backend.LeagueOfArrows.dtos;
 
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class LoginResponse {
     private String token;
-    private String role;
+    private String email;
+    private String rol;
     private Long userId;
-
-    public LoginResponse(String token, String role, Long userId){
-        this.token = token;
-        this.role = role;
-        this.userId = userId;
-    }
 }
