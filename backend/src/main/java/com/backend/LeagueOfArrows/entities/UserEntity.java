@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 public class UserEntity {
-    private Long idUsuario;
+    private Long userId;
     private String email;
     private String password;
-    private String rol; //Arquero o Administrador
+    private String rol; //Arquero o Admin // ARCHER OR ADMIN
 }

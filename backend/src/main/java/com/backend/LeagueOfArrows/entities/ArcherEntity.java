@@ -1,11 +1,13 @@
 package com.backend.LeagueOfArrows.entities;
 
+
 import lombok.Data;
 
 @Data
 public class ArcherEntity {
 
-    private Long idArcher;
-    private Long idUser;
+    private Long archerId;
+    private Long userId;
     private String name;
+
 }
