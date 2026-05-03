@@ -12,5 +12,5 @@ public class UserEntity {
     private Long userId;
     private String email;
     private String password;
-    private String rol; //// ARCHER OR ADMIN
+    private String rol; //// ARQUERO OR ADMIN
 }

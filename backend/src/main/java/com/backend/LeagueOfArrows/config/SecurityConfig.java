@@ -29,14 +29,26 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Definicion de rutas segun roles
                 .authorizeHttpRequests(auth -> auth
+
+                        // En caso de querer agregar mas rutas el orden convencional que se sigue es:
+                        // Rutas publicas -> Rutas especificas -> Rutas generales
+
+                        // Rutas publicas
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // Rutas especificas
+                        .requestMatchers(HttpMethod.GET, "/api/archers/me/history").hasRole("ARQUERO")
+                        .requestMatchers(HttpMethod.GET, "/api/archers/top-month").authenticated()
+                        .requestMatchers("/api/tournaments/*/podium").authenticated()
+
+                        // Rutas generales
                         .requestMatchers(HttpMethod.POST, "/api/tournaments/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/tournaments/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/tournaments/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/archers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/archers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/archers/**").hasRole("ADMIN")
+
 
                         // Cualquier otra ruta requiere autenticacion
                         .anyRequest().authenticated()
