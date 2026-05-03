@@ -48,6 +48,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/archers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/archers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/archers/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/inscriptions/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/inscriptions/**").hasRole("ADMIN")
 
 
                         // Cualquier otra ruta requiere autenticacion
