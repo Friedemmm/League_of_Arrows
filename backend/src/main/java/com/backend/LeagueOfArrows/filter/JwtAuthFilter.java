@@ -45,7 +45,6 @@ public class JwtAuthFilter extends OncePerRequestFilter{
         Long userId = jwtService.extractUserId(token);
 
         // Guardar los datos del usuario en el request para que pueda ser accedido en las rutas
-        // Tini esto es lo que tienes que ver :D
         request.setAttribute("userId", userId);
 
 

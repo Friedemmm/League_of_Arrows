@@ -1,6 +1,8 @@
 package com.backend.LeagueOfArrows.services;
 
 import com.backend.LeagueOfArrows.dtos.ArcherDTO;
+import com.backend.LeagueOfArrows.dtos.HistoryDTO;
+import com.backend.LeagueOfArrows.dtos.TopArcherDTO;
 import com.backend.LeagueOfArrows.entities.ArcherEntity;
 import com.backend.LeagueOfArrows.repositories.ArcherRepository;
 import com.backend.LeagueOfArrows.repositories.UserRepository;
@@ -46,5 +48,16 @@ public class ArcherService  {
     public void delete(Long id){
         int rows = archerRepository.deleteById(id);
         if(rows == 0) throw new NoSuchElementException("Arquero no encontrado");
+    }
+    public List<HistoryDTO> getArcherHistory(Long userId) {
+        // Depende de usuario logueado, busca el arquero asociado al usuario logueado
+        ArcherEntity archer = archerRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Arquero no encontrado para este usuario"));
+
+        // Con el id del arquero busca su historial
+        return archerRepository.findHistoryByArcherId(archer.getArcherId());
+    }
+    public List<TopArcherDTO> getTopArchersLastMonth() {
+        return archerRepository.findTopArchersLastMonth();
     }
 }

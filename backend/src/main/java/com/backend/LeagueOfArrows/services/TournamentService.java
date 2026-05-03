@@ -1,5 +1,6 @@
 package com.backend.LeagueOfArrows.services;
 
+import com.backend.LeagueOfArrows.dtos.PodiumDTO;
 import com.backend.LeagueOfArrows.entities.TournamentEntity;
 import com.backend.LeagueOfArrows.repositories.TournamentRepository;
 import com.backend.LeagueOfArrows.dtos.TournamentDTO;
@@ -24,6 +25,7 @@ public class TournamentService {
     public TournamentEntity create(TournamentDTO tournamentDTO){
         TournamentEntity tournament = new TournamentEntity();
         tournament.setCategoryId(tournamentDTO.getCategoryId());
+        tournament.setNombre(tournamentDTO.getNombre());
         tournament.setStartDate(tournamentDTO.getStartDate());
         tournament.setEndDate(tournamentDTO.getEndDate());
         tournament.setActive(tournamentDTO.getActive() != null ? tournamentDTO.getActive() : true);
@@ -34,6 +36,7 @@ public class TournamentService {
     public TournamentEntity update(Long id, TournamentDTO tournamentDTO){
         TournamentEntity tournament = tournamentRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Torneo no encontrado"));
         tournament.setCategoryId(tournamentDTO.getCategoryId());
+        tournament.setNombre(tournamentDTO.getNombre());
         tournament.setStartDate(tournamentDTO.getStartDate());
         tournament.setEndDate(tournamentDTO.getEndDate());
         tournament.setActive(tournamentDTO.getActive() != null ? tournamentDTO.getActive() : true);
@@ -44,5 +47,8 @@ public class TournamentService {
     public void delete(Long id){
         int rows = tournamentRepository.deleteById(id);
         if(rows == 0) throw new NoSuchElementException("Torneo no encontrado");
+    }
+    public List<PodiumDTO> getTournamentPodium(Long tournamentId) {
+        return tournamentRepository.findPodiumByTournamentId(tournamentId);
     }
 }

@@ -1,11 +1,13 @@
 package com.backend.LeagueOfArrows.controllers;
 
+import com.backend.LeagueOfArrows.dtos.PodiumDTO;
 import com.backend.LeagueOfArrows.dtos.TournamentDTO;
 import com.backend.LeagueOfArrows.services.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -52,5 +54,9 @@ public class TournamentController {
         } catch (NoSuchElementException e){
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         }
+    }
+    @GetMapping("/{id}/podium")
+    public ResponseEntity<List<PodiumDTO>> getPodium(@PathVariable Long id) {
+        return ResponseEntity.ok(tournamentService.getTournamentPodium(id));
     }
 }

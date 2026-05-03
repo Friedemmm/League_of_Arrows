@@ -2,12 +2,16 @@ package com.backend.LeagueOfArrows.controllers;
 
 
 import com.backend.LeagueOfArrows.dtos.ArcherDTO;
+import com.backend.LeagueOfArrows.dtos.TopArcherDTO;
 import com.backend.LeagueOfArrows.services.ArcherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import com.backend.LeagueOfArrows.dtos.HistoryDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 @RestController
@@ -55,4 +59,15 @@ public class ArcherController {
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         }
     }
+    @GetMapping("/me/history")
+    public ResponseEntity<List<HistoryDTO>> getMyHistory(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return ResponseEntity.ok(archerService.getArcherHistory(userId));
+    }
+    @GetMapping("/top-month")
+    public ResponseEntity<List<TopArcherDTO>> getTopArchersLastMonth() {
+        return ResponseEntity.ok(archerService.getTopArchersLastMonth());
+    }
+
+
 }
