@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS audit_log, rankings, arrows, rounds, inscriptions, tournaments, archers, categories, users CASCADE;
+
 CREATE TABLE categories (
     id_category BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE

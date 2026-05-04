@@ -6,13 +6,13 @@ INSERT INTO categories (name) VALUES
 
 --(Hash BCrypt para la clave 'admin123')
 INSERT INTO users (email, password, rol) VALUES 
-('admin@leagueofarrows.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ADMIN'),
-('ashe@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
-('varus@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
-('kindred@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
-('vayne@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
-('quinn@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
-('twitch@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO');
+('admin@leagueofarrows.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ADMIN'),
+('ashe@gmail.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ARQUERO'),
+('varus@gmail.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ARQUERO'),
+('kindred@gmail.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ARQUERO'),
+('vayne@gmail.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ARQUERO'),
+('quinn@gmail.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ARQUERO'),
+('twitch@gmail.com', '$2a$10$5uAS9l6O9k/nyiS.oKtHAuKr5r.v4vSXuhW7tnbiFEXtszapZvkkq', 'ARQUERO');
 
 INSERT INTO archers (id_user, name, id_category) VALUES 
 (2, 'Ashe', 1),
