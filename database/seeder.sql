@@ -1,0 +1,52 @@
+INSERT INTO categories (name) VALUES 
+('Largo'),
+('Recurvo'),
+('Compuesto'),
+('Tradicional');
+
+--(Hash BCrypt para la clave 'admin123')
+INSERT INTO users (email, password, rol) VALUES 
+('admin@leagueofarrows.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ADMIN'),
+('ashe@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
+('varus@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
+('kindred@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
+('vayne@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
+('quinn@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO'),
+('twitch@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGFGLn05DNavEQ08m51u', 'ARQUERO');
+
+INSERT INTO archers (id_user, name, id_category) VALUES 
+(2, 'Ashe', 1),
+(3, 'Varus', 1),
+(4, 'Kindred', 1),
+(5, 'Vayne', 2),
+(6, 'Quinn', 3),
+(7, 'Twitch', 4);
+
+INSERT INTO tournaments (name, id_category, start_date, end_date, is_active) VALUES 
+('Campeonato mundial de tiro 2026', 1, CURRENT_DATE - INTERVAL '5 days', CURRENT_DATE + INTERVAL '2 days', TRUE),
+('MSI 2025', 1, '2025-10-20', '2025-11-05', FALSE);
+
+INSERT INTO inscriptions (id_archer, id_tournament, score) VALUES 
+(1, 1, 58),
+(2, 1, 56),
+(3, 1, 54);
+
+INSERT INTO rounds (id_tournament, id_archer, round_number) VALUES 
+(1, 1, 1),
+(1, 1, 2);
+
+INSERT INTO arrows (id_round, arrow_number, score) VALUES 
+(1, 1, 10),
+(1, 2, 10),
+(1, 3, 9),
+(1, 4, 10),
+(1, 5, 9),
+(1, 6, 10);
+
+INSERT INTO audit_log (id_archer, id_tournament, old_score, new_score, modified_by) VALUES 
+(1, 1, 57, 58, 1);
+
+INSERT INTO rankings (id_tournament, id_archer, position, total_score) VALUES 
+(2, 1, 1, 680),
+(2, 2, 2, 675),
+(2, 3, 3, 670);
