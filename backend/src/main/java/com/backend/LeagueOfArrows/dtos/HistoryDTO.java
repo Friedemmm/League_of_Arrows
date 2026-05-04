@@ -14,7 +14,7 @@ public class HistoryDTO {
     private String categoryName;
     private LocalDate startDate;
     private LocalDate endDate;
-    private boolean active;
+    private Boolean active;
     private Integer totalScore;
     private Integer position; // es null si el torneo aun no termina
 }

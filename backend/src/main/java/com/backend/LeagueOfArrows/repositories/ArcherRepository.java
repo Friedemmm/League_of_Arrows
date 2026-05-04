@@ -18,96 +18,93 @@ public class ArcherRepository {
 
     private final RowMapper<ArcherEntity> archerRowMapper = (rs, n) -> {
         ArcherEntity archer = new ArcherEntity();
-        archer.setArcherId(rs.getLong("id_arquero"));
-        archer.setUserId(rs.getLong("id_usuario"));
-        archer.setName(rs.getString("nombre"));
+        archer.setArcherId(rs.getLong("id_archer"));
+        archer.setUserId(rs.getLong("id_user"));
+        archer.setName(rs.getString("name"));
+        archer.setCategoryId(rs.getObject("id_category", Long.class));
         return archer;
     };
 
     public List<ArcherEntity> findAll() {
         return jdbc.query(
-                "SELECT * FROM arquero", archerRowMapper);
+                "SELECT * FROM archers", archerRowMapper);
     }
 
 
     public Optional<ArcherEntity> findById(Long id) {
-        var list = jdbc.query("SELECT * FROM arquero WHERE id_arquero = ?", archerRowMapper, id);
+        var list = jdbc.query("SELECT * FROM archers WHERE id_archer = ?", archerRowMapper, id);
         return list.stream().findFirst();
     }
 
     public Optional<ArcherEntity> findByUserId(Long userId) {
-        var list = jdbc.query("SELECT * FROM arquero WHERE id_usuario = ?", archerRowMapper, userId);
+        var list = jdbc.query("SELECT * FROM archers WHERE id_user = ?", archerRowMapper, userId);
         return list.stream().findFirst();
     }
 
 
-    public Long save(Long userId, String name) {
-        return jdbc.queryForObject("INSERT INTO arquero (id_usuario, nombre) VALUES (?, ?) RETURNING id_arquero", Long.class, userId, name);
+    public Long save(Long userId, String name, Long categoryId) {
+        return jdbc.queryForObject("INSERT INTO archers (id_user, name, id_category) VALUES (?, ?, ?) RETURNING id_archer", Long.class, userId, name, categoryId);
     }
 
 
-    public int update(Long id, String name) {
+    public int update(Long id, String name, Long categoryId) {
         return jdbc.update(
-                "UPDATE arquero SET nombre = ? WHERE id_arquero = ?",
-                 name,id);
+                "UPDATE archers  SET name = ?, id_category = ? WHERE id_archer = ?",
+                 name, categoryId, id);
     }
 
     public int deleteById(Long id) {
-        return jdbc.update("DELETE FROM arquero WHERE id_arquero = ?", id);
+        return jdbc.update("DELETE FROM archers WHERE id_archer = ?", id);
     }
 
     public List<HistoryDTO> findHistoryByArcherId(Long archerId) {
-        String sql =
-            """
-            SELECT
-                t.id_torneo,
-                t.nombre,
-                c.nombre      AS categoria,
-                t.fecha_inicio,
-                t.fecha_fin,
-                t.activo,
-                i.puntaje_total,
-                r.posicion
-            FROM inscripcion i
-            INNER JOIN torneo t     ON i.id_torneo    = t.id_torneo
-            INNER JOIN categoria c  ON t.id_categoria = c.id_categoria
-            LEFT JOIN ranking r     ON r.id_torneo    = i.id_torneo
-                                   AND r.id_arquero   = i.id_arquero
-            WHERE i.id_arquero = ?
-            ORDER BY t.fecha_inicio DESC
-            """;
-
+        String sql = """
+        SELECT
+            t.id_tournament,
+            t.name,
+            c.name          AS category,
+            t.start_date,
+            t.end_date,
+            t.is_active,
+            i.score,
+            r.position
+        FROM inscriptions i
+        INNER JOIN tournaments t  ON i.id_tournament = t.id_tournament
+        INNER JOIN categories c   ON t.id_category   = c.id_category
+        LEFT JOIN rankings r      ON r.id_tournament = i.id_tournament
+                                 AND r.id_archer     = i.id_archer
+        WHERE i.id_archer = ?
+        ORDER BY t.start_date DESC
+        """;
         return jdbc.query(sql, (rs, n) -> new HistoryDTO(
-                rs.getLong("id_torneo"),
-                rs.getString("nombre"),
-                rs.getString("categoria"),
-                rs.getDate("fecha_inicio").toLocalDate(),
-                rs.getDate("fecha_fin").toLocalDate(),
-                rs.getBoolean("activo"),
-                rs.getInt("puntaje_total"),
-                rs.getObject("posicion") != null ? rs.getInt("posicion") : null
+                rs.getLong("id_tournament"),
+                rs.getString("name"),
+                rs.getString("category"),
+                rs.getDate("start_date").toLocalDate(),
+                rs.getDate("end_date").toLocalDate(),
+                rs.getBoolean("is_active"),
+                rs.getInt("score"),
+                rs.getObject("position") != null ? rs.getInt("position") : null
         ), archerId);
     }
 
     public List<TopArcherDTO> findTopArchersLastMonth() {
-        String sql =
-            """
-            SELECT
-                a.id_arquero,
-                a.nombre,
-                SUM(i.puntaje_total) AS puntaje_mes
-            FROM inscripcion i
-            INNER JOIN arquero a  ON i.id_arquero = a.id_arquero
-            INNER JOIN torneo t   ON i.id_torneo  = t.id_torneo
-            WHERE t.fecha_inicio >= NOW() - INTERVAL '1 month'
-            GROUP BY a.id_arquero, a.nombre
-            ORDER BY puntaje_mes DESC
-            """;
-
+        String sql = """
+        SELECT
+            a.id_archer,
+            a.name,
+            SUM(i.score) AS monthly_score
+        FROM inscriptions i
+        INNER JOIN archers a      ON i.id_archer     = a.id_archer
+        INNER JOIN tournaments t  ON i.id_tournament = t.id_tournament
+        WHERE t.start_date >= NOW() - INTERVAL '1 month'
+        GROUP BY a.id_archer, a.name
+        ORDER BY monthly_score DESC
+        """;
         return jdbc.query(sql, (rs, n) -> new TopArcherDTO(
-                rs.getLong("id_arquero"),
-                rs.getString("nombre"),
-                rs.getInt("puntaje_mes")
+                rs.getLong("id_archer"),
+                rs.getString("name"),
+                rs.getInt("monthly_score")
         ));
     }
 

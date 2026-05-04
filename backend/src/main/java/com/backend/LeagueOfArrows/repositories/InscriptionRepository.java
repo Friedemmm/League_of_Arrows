@@ -18,32 +18,32 @@ public class InscriptionRepository {
 
     private final RowMapper<InscriptionEntity> inscriptionEntityRowMapper = (rs, rowNum) -> {
         InscriptionEntity inscription = new InscriptionEntity();
-        inscription.setInscriptionId(rs.getLong("id_inscripcion"));
-        inscription.setTournamentId(rs.getLong("id_torneo"));
-        inscription.setArcherId(rs.getLong("id_arquero"));
-        inscription.setScore(rs.getInt("puntaje_total"));
+        inscription.setInscriptionId(rs.getLong("id_inscription"));
+        inscription.setTournamentId(rs.getLong("id_archer"));
+        inscription.setArcherId(rs.getLong("id_tournament"));
+        inscription.setScore(rs.getInt("score"));
         return inscription;
     };
 
     public List<InscriptionEntity> findAll() {
-        return jdbc.query("SELECT * FROM inscripcion", inscriptionEntityRowMapper);
+        return jdbc.query("SELECT * FROM inscriptions", inscriptionEntityRowMapper);
     }
 
     public List<InscriptionEntity> findByArcherId(Long archerId) {
-        return jdbc.query("SELECT * FROM inscripcion WHERE id_arquero = ?", inscriptionEntityRowMapper, archerId);
+        return jdbc.query("SELECT * FROM inscriptions WHERE id_archer = ?", inscriptionEntityRowMapper, archerId);
     }
 
     public Optional<InscriptionEntity> findById(Long id) {
-        var list = jdbc.query("SELECT * FROM inscripcion WHERE id_inscripcion = ?", inscriptionEntityRowMapper, id);
+        var list = jdbc.query("SELECT * FROM inscriptions WHERE id_inscription = ?", inscriptionEntityRowMapper, id);
         return list.stream().findFirst();
     }
 
     public Long save(Long archerId, Long tournamentId) {
-        return jdbc.queryForObject("INSERT INTO inscripcion (id_arquero, id_torneo, puntaje_total) VALUES (?, ?, 0) RETURNING id_inscripcion", Long.class, archerId, tournamentId);
+        return jdbc.queryForObject("INSERT INTO inscriptions (id_archer, id_tournament, score) VALUES (?, ?, 0) RETURNING id_inscripcion", Long.class, archerId, tournamentId);
     }
 
     public int deteleById(Long id) {
-        return jdbc.update("DELETE FROM inscripcion WHERE id_inscripcion = ?", id);
+        return jdbc.update("DELETE FROM inscriptions WHERE id_inscriptions = ?", id);
     }
 
 }

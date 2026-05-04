@@ -6,7 +6,7 @@ import java.time.LocalDate;
 @Data
 public class TournamentEntity {
     private Long tournamentId;
-    private String nombre;
+    private String name;
     private Long categoryId;
     private LocalDate startDate;
     private LocalDate endDate;

@@ -35,13 +35,16 @@ public class ArcherService  {
     public ArcherEntity save(ArcherDTO archerDTO){
         String hash = passwordEncoder.encode(archerDTO.getPassword());
         Long userId = userRepository.saveUser(archerDTO.getEmail(), hash, "ARQUERO");
-        Long archerId = archerRepository.save(userId, archerDTO.getName());
+        Long archerId = archerRepository.save(userId, archerDTO.getName(), archerDTO.getCategoryId());
         return archerRepository.findById(archerId).orElseThrow();
     }
 
     public ArcherEntity update(Long id, ArcherDTO archerDTO){
         archerRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Arquero no encontrado"));
-        archerRepository.update(id, archerDTO.getName());
+
+        //Si se quiere actualizar el arquero pero viene sin categoria se conserva la que ya tiene
+        Long categoryId = archerDTO.getCategoryId() != null ? archerDTO.getCategoryId() : archerRepository.findById(id).get().getCategoryId();
+        archerRepository.update(id, archerDTO.getName(), categoryId);
         return archerRepository.findById(id).orElseThrow();
     }
 

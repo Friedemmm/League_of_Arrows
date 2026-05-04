@@ -25,7 +25,7 @@ public class TournamentService {
     public TournamentEntity create(TournamentDTO tournamentDTO){
         TournamentEntity tournament = new TournamentEntity();
         tournament.setCategoryId(tournamentDTO.getCategoryId());
-        tournament.setNombre(tournamentDTO.getNombre());
+        tournament.setName(tournamentDTO.getName());
         tournament.setStartDate(tournamentDTO.getStartDate());
         tournament.setEndDate(tournamentDTO.getEndDate());
         tournament.setActive(tournamentDTO.getActive() != null ? tournamentDTO.getActive() : true);
@@ -36,7 +36,7 @@ public class TournamentService {
     public TournamentEntity update(Long id, TournamentDTO tournamentDTO){
         TournamentEntity tournament = tournamentRepository.findById(id).orElseThrow(()-> new NoSuchElementException("Torneo no encontrado"));
         tournament.setCategoryId(tournamentDTO.getCategoryId());
-        tournament.setNombre(tournamentDTO.getNombre());
+        tournament.setName(tournamentDTO.getName());
         tournament.setStartDate(tournamentDTO.getStartDate());
         tournament.setEndDate(tournamentDTO.getEndDate());
         tournament.setActive(tournamentDTO.getActive() != null ? tournamentDTO.getActive() : true);

@@ -8,4 +8,5 @@ public class ArcherDTO {
     private String name;
     private String email;
     private String password;
+    private Long categoryId;
 }

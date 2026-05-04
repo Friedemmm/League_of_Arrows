@@ -13,5 +13,5 @@ public class ArcherEntity {
     private Long archerId;
     private Long userId;
     private String name;
-
+    private Long categoryId;
 }
