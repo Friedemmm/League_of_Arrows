@@ -1,207 +1,217 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- ===========================================================
+-- PRE-REQUISITES & CLEANUP
+-- Drop procedures and functions to avoid parameter name conflicts
+-- ===========================================================
+
+DROP PROCEDURE IF EXISTS calcular_ranking_torneo(bigint);
+DROP PROCEDURE IF EXISTS registrar_puntuacion_ronda(bigint, bigint, integer, integer[]);
+
 -- ============================================================
--- 1. STORED PROCEDURE 1: Registrar Puntuación de Ronda
+-- 1. STORED PROCEDURE 1: Register Round Score
 -- ============================================================
 CREATE OR REPLACE PROCEDURE registrar_puntuacion_ronda(
-    p_idTorneo BIGINT,
-    p_idArquero BIGINT,
-    p_numeroRonda INT,
+    p_tournament_id BIGINT,
+    p_archer_id BIGINT,
+    p_round_number INT,
     p_scores INTEGER[]
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
     v_is_active BOOLEAN;
-    v_idRonda BIGINT;
+    v_round_id BIGINT;
     v_score INTEGER;
+    v_arrow_index INT := 1;
 BEGIN
-    -- 1. Validar que el torneo existe y está activo
-    SELECT Activo INTO v_is_active FROM torneos WHERE idTorneo = p_idTorneo;
+    -- 1. Validate that tournament exists and is active
+    SELECT is_active INTO v_is_active FROM tournaments WHERE id_tournament = p_tournament_id;
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Torneo con id % no existe.', p_idTorneo;
+        RAISE EXCEPTION 'Torneo con id % no existe.', p_tournament_id;
     END IF;
 
     IF NOT v_is_active THEN
-        RAISE EXCEPTION 'El torneo % no está activo.', p_idTorneo;
+        RAISE EXCEPTION 'El torneo % no está activo.', p_tournament_id;
     END IF;
 
-    -- 2. Validar que el arquero existe
-    IF NOT EXISTS (SELECT 1 FROM arqueros WHERE idArquero = p_idArquero) THEN
-        RAISE EXCEPTION 'Arquero con id % no existe.', p_idArquero;
+    -- 2. Validate that the archer exists
+    IF NOT EXISTS (SELECT 1 FROM archers WHERE id_archer = p_archer_id) THEN
+        RAISE EXCEPTION 'Arquero con id % no existe.', p_archer_id;
     END IF;
 
-    -- 3. Validar si la ronda ya existe para el torneo; si no, crearla
-    SELECT IdRonda INTO v_idRonda FROM rondas WHERE idTorneo = p_idTorneo AND numeroRonda = p_numeroRonda LIMIT 1;
+    -- 3. Check if the round already exists for the tournament, archer and round number; if not, create
+    SELECT id_round INTO v_round_id 
+    FROM rounds 
+    WHERE id_tournament = p_tournament_id 
+      AND id_archer = p_archer_id 
+      AND round_number = p_round_number 
+    LIMIT 1;
     
     IF NOT FOUND THEN
-        INSERT INTO rondas (idTorneo, numeroRonda, puntuacion)
-        VALUES (p_idTorneo, p_numeroRonda, 0)
-        RETURNING IdRonda INTO v_idRonda;
+        INSERT INTO rounds (id_tournament, id_archer, round_number)
+        VALUES (p_tournament_id, p_archer_id, p_round_number)
+        RETURNING id_round INTO v_round_id;
     END IF;
 
-    -- 4. Validar que no haya flechas ya registradas para este arquero en esta ronda
-    IF EXISTS (SELECT 1 FROM flechas WHERE IdRonda = v_idRonda AND idArquero = p_idArquero) THEN
-        RAISE EXCEPTION 'Las flechas de la ronda % para el arquero % ya fueron registradas.', p_numeroRonda, p_idArquero;
+    -- 4. Validate that no arrows have been registered for this round yet
+    IF EXISTS (SELECT 1 FROM arrows WHERE id_round = v_round_id) THEN
+        RAISE EXCEPTION 'Las flechas de la ronda % para el arquero % ya fueron registradas.', p_round_number, p_archer_id;
     END IF;
 
-    -- 5. Insertar cada flecha
+    -- 5. Insert each arrow
     FOREACH v_score IN ARRAY p_scores
     LOOP
-        INSERT INTO flechas (IdRonda, idArquero, puntuacion)
-        VALUES (v_idRonda, p_idArquero, v_score);
+        INSERT INTO arrows (id_round, arrow_number, score)
+        VALUES (v_round_id, v_arrow_index, v_score);
+        v_arrow_index := v_arrow_index + 1;
     END LOOP;
 
-    RAISE NOTICE 'Ronda % registrada para arquero % en torneo %.', p_numeroRonda, p_idArquero, p_idTorneo;
+    RAISE NOTICE 'Ronda % registrada para arquero % en torneo %.', p_round_number, p_archer_id, p_tournament_id;
 END;
 $$;
 
 -- ============================================================
--- 2. STORED PROCEDURE 2: Calcular Ranking del Torneo
+-- 2. STORED PROCEDURE 2: Calculate Tournament Ranking
 -- ============================================================
 CREATE OR REPLACE PROCEDURE calcular_ranking_torneo(
-    p_idTorneo BIGINT
+    p_tournament_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
     v_is_active BOOLEAN;
     rec RECORD;
-    v_posicion INT := 1;
+    v_position INT := 1;
 BEGIN
-    -- 1. Validar torneo
-    SELECT Activo INTO v_is_active FROM torneos WHERE idTorneo = p_idTorneo;
+    -- 1. Validate Tournament
+    SELECT is_active INTO v_is_active FROM tournaments WHERE id_tournament = p_tournament_id;
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Torneo con id % no existe.', p_idTorneo;
+        RAISE EXCEPTION 'Torneo con id % no existe.', p_tournament_id;
     END IF;
 
     IF v_is_active THEN
-        RAISE WARNING 'El torneo % sigue activo. Cálculo parcial.', p_idTorneo;
+        RAISE WARNING 'El torneo % sigue activo. Cálculo parcial.', p_tournament_id;
     END IF;
 
-    -- 2. Limpiar ranking previo
-    DELETE FROM rankings WHERE idTorneo = p_idTorneo;
+    -- 2. Clear previous ranking
+    DELETE FROM rankings WHERE id_tournament = p_tournament_id;
 
-    -- 3. Calcular suma total y reinsertar
+    -- 3. Calculate total sum and re-insert
     FOR rec IN
         SELECT 
-            f.idArquero, 
-            SUM(f.puntuacion) AS puntajeTotal
-        FROM rondas r
-        JOIN flechas f ON f.IdRonda = r.IdRonda
-        WHERE r.idTorneo = p_idTorneo
-        GROUP BY f.idArquero
-        ORDER BY puntajeTotal DESC
+            r.id_archer, 
+            SUM(a.score) AS total_score
+        FROM rounds r
+        JOIN arrows a ON a.id_round = r.id_round
+        WHERE r.id_tournament = p_tournament_id
+        GROUP BY r.id_archer
+        ORDER BY total_score DESC
     LOOP
-        INSERT INTO rankings (idTorneo, idArquero, posicion, puntajeFinal)
-        VALUES (p_idTorneo, rec.idArquero, v_posicion, rec.puntajeTotal);
+        INSERT INTO rankings (id_tournament, id_archer, position, total_score, updated_at)
+        VALUES (p_tournament_id, rec.id_archer, v_position, rec.total_score, CURRENT_TIMESTAMP);
         
-        v_posicion := v_posicion + 1;
+        v_position := v_position + 1;
     END LOOP;
 END;
 $$;
 
 -- ============================================================
--- 3. TRIGGER 1: Validar puntuación [0, 10]
+-- 3. TRIGGER 1: Validate score [0, 10]
 -- ============================================================
 CREATE OR REPLACE FUNCTION fn_validate_arrow_score()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    IF NEW.puntuacion < 0 OR NEW.puntuacion > 10 THEN
-        RAISE EXCEPTION 'Puntuación inválida: %. Debe estar entre 0 y 10.', NEW.puntuacion;
+    IF NEW.score < 0 OR NEW.score > 10 THEN
+        RAISE EXCEPTION 'Puntuación inválida: %. Debe estar entre 0 y 10.', NEW.score;
     END IF;
     RETURN NEW;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_validate_arrow_score ON flechas;
+DROP TRIGGER IF EXISTS trg_validate_arrow_score ON arrows;
 CREATE TRIGGER trg_validate_arrow_score
-BEFORE INSERT OR UPDATE ON flechas
+BEFORE INSERT OR UPDATE ON arrows
 FOR EACH ROW
 EXECUTE FUNCTION fn_validate_arrow_score();
 
 -- ============================================================
--- 4. TRIGGER 2: Auditoría de Modificación de Puntajes
+-- 4. TRIGGER 2: Score Modification Audit
 -- ============================================================
 CREATE OR REPLACE FUNCTION fn_audit_score_modification()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_idInscripcion BIGINT;
+    v_round_record RECORD;
     v_modified_by BIGINT;
     v_user_setting TEXT;
 BEGIN
-    -- Solo auditar si hubo un cambio real
-    IF OLD.puntuacion = NEW.puntuacion THEN
+    -- Only audit if there was an actual change
+    IF OLD.score = NEW.score THEN
         RETURN NEW;
     END IF;
 
-    -- Obtener el ID del usuario desde la variable de sesión
+    -- Get the User ID from the session variable
     v_user_setting := current_setting('app.current_user_id', true);
     IF v_user_setting IS NULL OR v_user_setting = '' THEN
         RAISE EXCEPTION 'Auditoría fallida: falta app.current_user_id en la sesión.';
     END IF;
     v_modified_by := v_user_setting::BIGINT;
 
-    -- Obtener la inscripción cruzando la ronda de la flecha modificada
-    SELECT i.idInscripcion INTO v_idInscripcion
-    FROM rondas r
-    JOIN inscripciones i ON r.idTorneo = i.idTorneo AND i.idArquero = NEW.idArquero
-    WHERE r.IdRonda = NEW.IdRonda;
+    -- Get tournament and archer from the round associated with the arrow
+    SELECT id_tournament, id_archer INTO v_round_record
+    FROM rounds
+    WHERE id_round = NEW.id_round;
 
-    -- Insertar en tabla de auditoría según UML
-    INSERT INTO auditorias (
-        idUsuario, 
-        idInscripcion, 
-        puntajeAnterior, 
-        puntajeNuevo, 
-        fechaModificacion
-    ) VALUES (
-        v_modified_by, 
-        v_idInscripcion, 
-        OLD.puntuacion, 
-        NEW.puntuacion, 
-        NOW()
+    -- Insert into audit_log table
+    INSERT INTO audit_log (id_archer, id_tournament, old_score, new_score, modified_by, modified_at)
+    VALUES (
+        v_round_record.id_archer,
+        v_round_record.id_tournament,
+        OLD.score,
+        NEW.score,
+        v_modified_by,
+        CURRENT_TIMESTAMP
     );
 
     RETURN NEW;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_audit_score_modification ON flechas;
+DROP TRIGGER IF EXISTS trg_audit_score_modification ON arrows;
 CREATE TRIGGER trg_audit_score_modification
-AFTER UPDATE ON flechas
+AFTER UPDATE ON arrows
 FOR EACH ROW
 EXECUTE FUNCTION fn_audit_score_modification();
 
 -- ============================================================
--- 5. VISTA MATERIALIZADA: Leaderboard Histórico
+-- 5. MATERIALIZED VIEW: Historical Leaderboard
 -- ============================================================
 CREATE MATERIALIZED VIEW IF NOT EXISTS mv_leaderboard_historico AS
 SELECT
-    ROW_NUMBER() OVER (ORDER BY ROUND(AVG(f.puntuacion)::NUMERIC, 4) DESC) AS posicion_global,
-    ar.idArquero,
-    ar.nombre,
-    COUNT(DISTINCT r.idTorneo) AS torneos_jugados,
-    COUNT(f.IdFlecha) AS flechas_lanzadas,
-    SUM(f.puntuacion) AS puntaje_total,
-    ROUND(AVG(f.puntuacion)::NUMERIC, 4) AS promedio_por_flecha
-FROM arqueros ar
-JOIN flechas f ON f.idArquero = ar.idArquero
-JOIN rondas r ON r.IdRonda = f.IdRonda
-GROUP BY ar.idArquero, ar.nombre
+    ROW_NUMBER() OVER (ORDER BY ROUND(AVG(a.score)::NUMERIC, 4) DESC) AS posicion_global,
+    ar.id_archer,
+    ar.name AS nombre,
+    COUNT(DISTINCT r.id_tournament) AS torneos_jugados,
+    COUNT(a.id_arrow) AS flechas_lanzadas,
+    SUM(a.score) AS puntaje_total,
+    ROUND(AVG(a.score)::NUMERIC, 4) AS promedio_por_flecha
+FROM archers ar
+JOIN rounds r ON r.id_archer = ar.id_archer
+JOIN arrows a ON a.id_round = r.id_round
+GROUP BY ar.id_archer, ar.name
 ORDER BY promedio_por_flecha DESC
 LIMIT 50
 WITH DATA;
 
 CREATE UNIQUE INDEX IF NOT EXISTS uidx_mv_leaderboard_arquero 
-    ON mv_leaderboard_historico (idArquero);
+    ON mv_leaderboard_historico (id_archer);
 
 -- ============================================================
--- 6. FUNCIÓN DE REFRESCO DIARIO
+-- 6. DAILY REFRESH FUNCTION
 -- ============================================================
 CREATE OR REPLACE FUNCTION refresh_historical_leaderboard()
 RETURNS VOID
