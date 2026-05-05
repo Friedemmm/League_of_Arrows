@@ -6,7 +6,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/pages/Login.vue'),
+    component: () => import('../pages/Login.vue'),
     meta: { public: true },
   },
 
@@ -14,19 +14,19 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/pages/Home.vue'),
+    component: () => import('../pages/Home.vue'),
     meta: { public: true },
   },
   {
     path: '/leaderboard',
     name: 'Leaderboard',
-    component: () => import('@/pages/Leaderboard.vue'),
+    component: () => import('../pages/Leaderboard.vue'),
     meta: { public: true },
   },
   {
     path: '/tournaments',
     name: 'Tournaments',
-    component: () => import('@/pages/Tournaments.vue'),
+    component: () => import('../pages/Tournaments.vue'),
     meta: { public: true },
   },
 
@@ -34,59 +34,59 @@ const routes = [
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: () => import('@/pages/Dashboard.vue'),
+    component: () => import('../pages/Dashboard.vue'),
   },
   {
     path: '/history',
     name: 'ArcherHistory',
-    component: () => import('@/pages/ArcherHistory.vue'),
+    component: () => import('../pages/ArcherHistory.vue'),
   },
   {
     path: '/profile',
     name: 'ArcherProfile',
-    component: () => import('@/pages/ArcherProfile.vue'),
+    component: () => import('../pages/ArcherProfile.vue'),
   },
   {
     path: '/trending',
     name: 'Trending',
-    component: () => import('@/pages/Trending.vue'),
+    component: () => import('../pages/Trending.vue'),
   },
 
   // Admin (requires ADMIN role)
   {
     path: '/admin/archers',
     name: 'AdminArchers',
-    component: () => import('@/pages/admin/AdminArchers.vue'),
+    component: () => import('../pages/admin/AdminArchers.vue'),
     meta: { requiresAdmin: true },
   },
   {
     path: '/admin/tournaments',
     name: 'AdminTournaments',
-    component: () => import('@/pages/admin/AdminTournaments.vue'),
+    component: () => import('../pages/admin/AdminTournaments.vue'),
     meta: { requiresAdmin: true },
   },
   {
     path: '/admin/scoring',
     name: 'AdminScoring',
-    component: () => import('@/pages/admin/AdminScoring.vue'),
+    component: () => import('../pages/admin/AdminScoring.vue'),
     meta: { requiresAdmin: true },
   },
   {
     path: '/admin/ranking',
     name: 'AdminRanking',
-    component: () => import('@/pages/admin/AdminRanking.vue'),
+    component: () => import('../pages/admin/AdminRanking.vue'),
     meta: { requiresAdmin: true },
   },
   {
     path: '/admin/audit',
     name: 'AdminAudit',
-    component: () => import('@/pages/admin/AdminAudit.vue'),
+    component: () => import('../pages/admin/AdminAudit.vue'),
     meta: { requiresAdmin: true },
   },
   {
     path: '/admin/categories',
     name: 'AdminCategories',
-    component: () => import('@/pages/admin/AdminCategories.vue'),
+    component: () => import('../pages/admin/AdminCategories.vue'),
     meta: { requiresAdmin: true },
   },
 
