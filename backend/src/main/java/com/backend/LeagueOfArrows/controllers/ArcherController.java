@@ -2,6 +2,7 @@ package com.backend.LeagueOfArrows.controllers;
 
 
 import com.backend.LeagueOfArrows.dtos.ArcherDTO;
+import com.backend.LeagueOfArrows.dtos.LeaderboardDTO;
 import com.backend.LeagueOfArrows.dtos.TopArcherDTO;
 import com.backend.LeagueOfArrows.services.ArcherService;
 import lombok.RequiredArgsConstructor;
@@ -69,5 +70,9 @@ public class ArcherController {
         return ResponseEntity.ok(archerService.getTopArchersLastMonth());
     }
 
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<LeaderboardDTO>> getHistoricalLeaderboard() {
+        return ResponseEntity.ok(archerService.getHistoricalLeaderboard());
+    }
 
 }

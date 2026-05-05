@@ -1,5 +1,6 @@
 package com.backend.LeagueOfArrows.repositories;
 
+import com.backend.LeagueOfArrows.dtos.LeaderboardDTO;
 import com.backend.LeagueOfArrows.dtos.TopArcherDTO;
 import com.backend.LeagueOfArrows.entities.ArcherEntity;
 import com.backend.LeagueOfArrows.dtos.HistoryDTO;
@@ -22,12 +23,21 @@ public class ArcherRepository {
         archer.setUserId(rs.getLong("id_user"));
         archer.setName(rs.getString("name"));
         archer.setCategoryId(rs.getObject("id_category", Long.class));
+        // enriched fields (may be absent in single-row queries)
+        try { archer.setCategoryName(rs.getString("category_name")); } catch (Exception ignored) {}
+        try { archer.setEmail(rs.getString("email")); }              catch (Exception ignored) {}
         return archer;
     };
 
     public List<ArcherEntity> findAll() {
-        return jdbc.query(
-                "SELECT * FROM archers", archerRowMapper);
+        String sql = """
+            SELECT a.*, c.name AS category_name, u.email
+            FROM archers a
+            LEFT JOIN categories c ON c.id_category = a.id_category
+            LEFT JOIN users      u ON u.id_user      = a.id_user
+            ORDER BY a.id_archer
+            """;
+        return jdbc.query(sql, archerRowMapper);
     }
 
 
@@ -105,6 +115,30 @@ public class ArcherRepository {
                 rs.getLong("id_archer"),
                 rs.getString("name"),
                 rs.getInt("monthly_score")
+        ));
+    }
+
+    public List<LeaderboardDTO> findHistoricalLeaderboard() {
+        String sql = """
+        SELECT
+            posicion_global,
+            id_archer,
+            nombre,
+            torneos_jugados,
+            flechas_lanzadas,
+            puntaje_total,
+            promedio_por_flecha
+        FROM mv_leaderboard_historico
+        ORDER BY posicion_global ASC
+        """;
+        return jdbc.query(sql, (rs, n) -> new LeaderboardDTO(
+                rs.getInt("posicion_global"),
+                rs.getLong("id_archer"),
+                rs.getString("nombre"),
+                rs.getInt("torneos_jugados"),
+                rs.getInt("flechas_lanzadas"),
+                rs.getInt("puntaje_total"),
+                rs.getBigDecimal("promedio_por_flecha")
         ));
     }
 

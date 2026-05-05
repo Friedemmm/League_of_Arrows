@@ -1,7 +1,17 @@
 <template>
-  <div class="page-wrapper">
+  <div class="page-wrapper profile-page">
     <div class="container" style="max-width:700px;">
-      <h1 class="section-title">Archer Profile</h1>
+
+      <div class="page-header">
+        <button class="btn-back" id="btn-back-profile" @click="$router.back()">
+          <span class="material-icons">arrow_back</span> Back
+        </button>
+        <h1 class="page-title">
+          <span class="material-icons page-title-icon">person</span>
+          Archer Profile
+        </h1>
+        <hr class="page-rule" />
+      </div>
 
       <div class="profile-card lol-card">
         <div class="profile-avatar">
@@ -65,6 +75,30 @@ function handleLogout() {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+.profile-page {
+  padding: calc(var(--header-height, 70px) + 2rem) 0 4rem;
+  min-height: 100vh;
+}
+
+.page-header { margin-bottom: 1.5rem; }
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-family: 'Cinzel', serif; font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 0; margin-bottom: 1rem; transition: color 0.2s;
+}
+.btn-back:hover { color: var(--lol-gold); }
+.btn-back .material-icons { font-size: 1rem; }
+
+.page-title {
+  font-size: 1.5rem; font-family: 'Cinzel', serif;
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0;
+}
+.page-title-icon { font-size: 1.3rem; color: var(--lol-gold); }
+.page-rule { margin: 0.8rem 0 1.5rem; }
 .profile-card {
   display: flex;
   align-items: center;

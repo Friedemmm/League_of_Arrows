@@ -1,13 +1,25 @@
 <template>
-  <div class="page-wrapper">
+  <div class="page-wrapper history-page">
     <div class="container">
-      <h1 class="section-title">Tournament History</h1>
-      <p class="text-secondary mb-4" style="margin-top:-1rem;">Your personal performance record across all competitions.</p>
+
+      <!-- Page header (subtitle strictly above the rule) -->
+      <div class="page-header">
+        <button class="btn-back" id="btn-back-history" @click="$router.back()">
+          <span class="material-icons">arrow_back</span> Back
+        </button>
+        <h1 class="page-title">
+          <span class="material-icons page-title-icon">history</span>
+          Tournament History
+        </h1>
+        <p class="page-subtitle">Your personal performance record across all competitions.</p>
+        <hr class="page-rule" />
+      </div>
 
       <div v-if="loading" class="loading-center"><div class="spinner"></div></div>
 
       <template v-else>
-        <div class="stat-grid">
+        <!-- Stats row -->
+        <div class="stat-grid mb-4">
           <div class="stat-card">
             <div class="stat-value">{{ history.length }}</div>
             <div class="stat-label">Tournaments</div>
@@ -26,8 +38,6 @@
           </div>
         </div>
 
-        <div class="gold-divider"></div>
-
         <!-- Timeline -->
         <div class="history-timeline" v-if="history.length">
           <div
@@ -45,10 +55,10 @@
                 </span>
               </div>
               <div class="tl-meta">
-                <span class="tl-score">{{ entry.score }} pts</span>
+                <span class="tl-score">{{ entry.totalScore }} pts</span>
                 <span class="tl-sep">·</span>
                 <span class="tl-date">{{ formatDate(entry.endDate) }}</span>
-                <span class="tl-sep">·</span>
+                <span class="tl-sep" v-if="entry.categoryName">·</span>
                 <span class="badge badge-blue" v-if="entry.categoryName">{{ entry.categoryName }}</span>
               </div>
             </div>
@@ -71,7 +81,7 @@ import { getMyHistory } from '@/api/archers'
 const history = ref([])
 const loading = ref(true)
 
-const totalScore   = computed(() => history.value.reduce((sum, h) => sum + (h.score || 0), 0))
+const totalScore   = computed(() => history.value.reduce((sum, h) => sum + (h.totalScore || 0), 0))
 const avgScore     = computed(() => history.value.length
   ? (totalScore.value / history.value.length).toFixed(1) : '—')
 const bestPosition = computed(() => {
@@ -93,6 +103,65 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+.history-page {
+  padding: calc(var(--header-height, 70px) + 2rem) 0 4rem;
+  min-height: 100vh;
+}
+
+/* ── Page Header (subtitle sits above the rule, no clipping) ── */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
+}
+.btn-back:hover { color: var(--lol-gold); }
+.btn-back .material-icons { font-size: 1rem; }
+
+.page-title {
+  font-size: 1.5rem;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.page-title-icon {
+  font-size: 1.3rem;
+  color: var(--lol-gold);
+}
+
+/* Subtitle MUST be between the h1 and the hr — order in DOM guarantees this */
+.page-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0 0 0;          /* NO bottom margin — the hr provides its own spacing */
+  line-height: 1.4;
+}
+
+/* The gold rule comes AFTER the subtitle in the DOM */
+.page-rule {
+  margin: 0.8rem 0 1.5rem;  /* top gap from subtitle, bottom gap before content */
+}
+
+/* ── Timeline ─────────────────────────────────────────────── */
 .history-timeline {
   display: flex;
   flex-direction: column;
@@ -163,7 +232,7 @@ onMounted(async () => {
   font-family: 'Cinzel', serif;
 }
 
-.tl-sep { color: var(--text-muted); }
+.tl-sep  { color: var(--text-muted); }
 .tl-date { color: var(--text-muted); }
 
 .empty-state { max-width: 400px; margin: 0 auto; }

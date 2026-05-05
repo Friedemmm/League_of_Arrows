@@ -24,11 +24,18 @@ public class TournamentRepository {
         tournament.setStartDate(rs.getDate("start_date").toLocalDate());
         tournament.setEndDate(rs.getDate("end_date").toLocalDate());
         tournament.setActive(rs.getBoolean("is_active"));
+        try { tournament.setCategoryName(rs.getString("category_name")); } catch (Exception ignored) {}
         return tournament;
     };
 
     public List<TournamentEntity> findAll() {
-        return jdbc.query("SELECT * FROM tournaments", tournamentEntityRowMapper);
+        String sql = """
+            SELECT t.*, c.name AS category_name
+            FROM tournaments t
+            LEFT JOIN categories c ON c.id_category = t.id_category
+            ORDER BY t.start_date DESC
+            """;
+        return jdbc.query(sql, tournamentEntityRowMapper);
     }
 
     public Optional<TournamentEntity> findById(Long id) {

@@ -9,47 +9,14 @@
 
     <!-- Center Nav -->
     <nav class="header-nav" role="navigation" aria-label="Main navigation">
-      <template v-if="!isLoggedIn">
-        <div v-for="item in guestNavItems" :key="item.to" class="nav-li">
-          <RouterLink
-            :to="item.to"
-            :id="`nav-${item.id}`"
-            class="nav-link"
-            :class="{ 'nav-link--active': isActive(item.to) }"
-          >{{ item.label }}</RouterLink>
-        </div>
-      </template>
-
-      <template v-else>
-        <div v-for="item in navItems" :key="item.to" class="nav-li">
-          <RouterLink
-            :to="item.to"
-            :id="`nav-${item.id}`"
-            class="nav-link"
-            :class="{ 'nav-link--active': isActive(item.to) }"
-          >{{ item.label }}</RouterLink>
-        </div>
-
-        <!-- Admin Dropdown -->
-        <div class="nav-li admin-trigger" v-if="isAdmin" @click="adminOpen = !adminOpen" id="nav-admin-menu">
-          <span class="nav-link" :class="{ 'nav-link--active': isAdminRoute }">
-            Admin <span class="chevron" :class="{ open: adminOpen }">▾</span>
-          </span>
-          <div class="dropdown-panel" v-show="adminOpen">
-            <div class="dp-header">Panel Administrativo</div>
-            <RouterLink
-              v-for="item in adminItems"
-              :key="item.to"
-              :to="item.to"
-              :id="`nav-admin-${item.id}`"
-              class="dp-item"
-              @click.stop="adminOpen = false"
-            >
-              <span class="dp-icon">{{ item.icon }}</span>{{ item.label }}
-            </RouterLink>
-          </div>
-        </div>
-      </template>
+      <div v-for="item in guestNavItems" :key="item.to" class="nav-li">
+        <RouterLink
+          :to="item.to"
+          :id="`nav-${item.id}`"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActive(item.to) }"
+        >{{ item.label }}</RouterLink>
+      </div>
     </nav>
 
     <!-- Right: Login or User -->
@@ -112,16 +79,37 @@
             <span class="dp-session-name">{{ user?.email?.split('@')[0] }}</span>
           </div>
           <RouterLink to="/dashboard" class="dp-item" @click.stop="userOpen = false">
-            <span class="dp-icon">📊</span> Resumen
+            <span class="material-icons dp-icon">dashboard</span> Resumen
           </RouterLink>
-          <RouterLink to="/profile" class="dp-item" @click.stop="userOpen = false">
-            <span class="dp-icon">👤</span> Mi información
-          </RouterLink>
-          <RouterLink to="/history" class="dp-item" @click.stop="userOpen = false">
-            <span class="dp-icon">🕐</span> Mi historial
-          </RouterLink>
+
+          <!-- Archer-only links -->
+          <template v-if="!isAdmin">
+            <RouterLink to="/profile" class="dp-item" @click.stop="userOpen = false">
+              <span class="material-icons dp-icon">person</span> Mi información
+            </RouterLink>
+            <RouterLink to="/history" class="dp-item" @click.stop="userOpen = false">
+              <span class="material-icons dp-icon">history</span> Mi historial
+            </RouterLink>
+          </template>
+
+          <!-- Admin-only links -->
+          <template v-if="isAdmin">
+            <RouterLink to="/admin/archers" class="dp-item" @click.stop="userOpen = false" id="sidebar-manage-archers">
+              <span class="material-icons dp-icon">group</span> Manage Archers
+            </RouterLink>
+            <RouterLink to="/admin/tournaments" class="dp-item" @click.stop="userOpen = false" id="sidebar-manage-events">
+              <span class="material-icons dp-icon">emoji_events</span> Manage Events
+            </RouterLink>
+            <RouterLink to="/admin/scoring" class="dp-item" @click.stop="userOpen = false" id="sidebar-score-entry">
+              <span class="material-icons dp-icon">sports_score</span> Score Registration
+            </RouterLink>
+            <RouterLink to="/admin/audit" class="dp-item" @click.stop="userOpen = false" id="sidebar-audit">
+              <span class="material-icons dp-icon">policy</span> Audit Table
+            </RouterLink>
+          </template>
+
           <button class="dp-item dp-item--danger" @click.stop="handleLogout" id="btn-logout">
-            <span class="dp-icon">🚪</span> Cerrar sesión
+            <span class="material-icons dp-icon">logout</span> Cerrar sesión
           </button>
         </div>
       </div>
@@ -135,7 +123,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import logoImg from '@/assets/logo.png'
+import logoImg from '@/components/assets/logo.png'
 
 const route  = useRoute()
 const router = useRouter()
@@ -189,6 +177,7 @@ function handleLogout() {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 /* ═══════════════ Header shell ═══════════════ */
 .app-header {
   position: sticky;
@@ -208,12 +197,13 @@ function handleLogout() {
 /* ═══════════════ Logo ═══════════════ */
 .header-logo { 
   flex-shrink: 1;
-  width: 80px; /* Controla el tamaño del logo desde aquí */
+  width: 30px; 
 }
 
 .header-logo img, 
 .header-logo svg {
-  width: 250px;
+  max-width: 250px;
+  width: 500px;
   height: auto;
 }
 
@@ -226,7 +216,7 @@ function handleLogout() {
 .logo-link:hover { opacity: 0.85; }
 
 .logo-img {
-  height: 52px;   /* scaled up from 36px */
+  height: 52px; 
   width: auto;
   display: block;
 }
@@ -396,7 +386,7 @@ function handleLogout() {
 .dp-item--danger { color: #e84057; }
 .dp-item--danger:hover { color: #ff5a6e; background: rgba(232,64,87,0.06); }
 
-.dp-icon { font-size: 0.85rem; flex-shrink: 0; }
+.dp-icon { font-size: 18px; line-height: 1; flex-shrink: 0; vertical-align: middle; }
 
 .dropdown-backdrop {
   position: fixed;

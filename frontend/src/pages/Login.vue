@@ -120,6 +120,12 @@ const password = ref('')
 const loading  = ref(false)
 const error    = ref('')
 
+// ── Dev test accounts (quick-fill) ───────────────────────────────────
+const TEST_ACCOUNTS = {
+  admin:  { email: 'admin@leagueofarrows.com', password: 'admin123' },
+  archer: { email: 'ashe@gmail.com',           password: 'admin123' },
+}
+
 function autofill(role) {
   const creds    = TEST_ACCOUNTS[role]
   email.value    = creds.email
@@ -132,8 +138,9 @@ async function handleLogin() {
   error.value   = ''
   loading.value = true
   try {
-    await auth.login(email.value, password.value)
-    router.push('/')
+    const user = await auth.login(email.value, password.value)
+    // Always redirect to dashboard — it handles role-aware content
+    router.push('/dashboard')
   } catch (e) {
     error.value = e.response?.data?.error || 'Credenciales inválidas. Intenta de nuevo.'
   } finally {

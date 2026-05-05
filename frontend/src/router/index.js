@@ -83,12 +83,6 @@ const routes = [
     component: () => import('../pages/admin/AdminAudit.vue'),
     meta: { requiresAdmin: true },
   },
-  {
-    path: '/admin/categories',
-    name: 'AdminCategories',
-    component: () => import('../pages/admin/AdminCategories.vue'),
-    meta: { requiresAdmin: true },
-  },
 
   // Catch-all
   { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -104,7 +98,7 @@ router.beforeEach((to) => {
   const auth = useAuthStore()
   if (!to.meta.public && !auth.isLoggedIn) return '/login'
   if (to.meta.requiresAdmin && !auth.isAdmin) return '/'
-  if (to.path === '/login' && auth.isLoggedIn) return '/'
+  if (to.path === '/login' && auth.isLoggedIn) return '/dashboard'
 })
 
 export default router

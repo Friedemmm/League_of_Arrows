@@ -13,7 +13,7 @@
         <div class="top-hero lol-card mb-4" v-if="archers.length">
           <div class="top-hero-rank">#1 This Month</div>
           <div class="top-hero-name">{{ archers[0].archerName }}</div>
-          <div class="top-hero-score">{{ archers[0].totalScore }} Total Points</div>
+          <div class="top-hero-score">{{ archers[0].monthlyScore }} Total Points</div>
         </div>
 
         <!-- Ranked list -->
@@ -27,10 +27,10 @@
             <div class="tr-rank" :class="rankClass(i)">{{ i + 1 }}</div>
             <div class="tr-info">
               <div class="tr-name">{{ archer.archerName }}</div>
-              <div class="tr-sub">{{ archer.categoryName || 'Uncategorized' }}</div>
+              <div class="tr-sub">Arquero</div>
             </div>
             <div class="tr-score-block">
-              <div class="tr-score">{{ archer.totalScore }}</div>
+              <div class="tr-score">{{ archer.monthlyScore }}</div>
               <div class="tr-score-label">pts</div>
             </div>
             <div class="tr-bar-wrap">
@@ -58,7 +58,7 @@ const archers = ref([])
 const loading = ref(true)
 
 const maxScore = computed(() =>
-  archers.value.length ? Math.max(...archers.value.map(a => a.totalScore || 0)) : 1
+  archers.value.length ? Math.max(...archers.value.map(a => a.monthlyScore || 0)) : 1
 )
 
 function barWidth(score) {
@@ -75,7 +75,12 @@ function rankClass(i) {
 onMounted(async () => {
   try {
     const res = await getTopMonth()
-    archers.value = res.data
+    // Backend TopArcherDTO: { archerId, name, monthlyScore }
+    archers.value = (Array.isArray(res.data) ? res.data : []).map(a => ({
+      archerId:     a.archerId,
+      archerName:   a.name ?? 'Arquero',
+      monthlyScore: a.monthlyScore ?? 0,
+    }))
   } catch { /* ignore */ } finally { loading.value = false }
 })
 </script>

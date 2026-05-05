@@ -37,10 +37,10 @@
 
           <div class="eventos-list">
             <div
-              v-for="t in tournaments"
-              :key="t.idTournament"
+              v-for="t in upcomingEvents"
+              :key="t.tournamentId"
               class="evento-row"
-              :id="`evento-${t.idTournament}`"
+              :id="`evento-${t.tournamentId}`"
             >
               <!-- Left: Date column -->
               <div class="evento-date-col">
@@ -55,21 +55,21 @@
               <div class="evento-card">
                 <div class="evento-card-top">
                   <div class="evento-badges">
-                    <span class="badge badge-blue">{{ t.categoryName || 'General' }}</span>
+                    <span class="badge badge-blue">{{ t.categoryId ? `Cat. ${t.categoryId}` : 'General' }}</span>
                     <span class="evento-full-date">{{ formatFullDate(t.startDate) }}</span>
                   </div>
                 </div>
                 <h3 class="evento-name">{{ t.name }}</h3>
                 <ul class="evento-details">
-                  <li>Categoría: <strong>{{ t.categoryName || 'General' }}</strong></li>
+                  <li>Categoría: <strong>{{ t.categoryId ? `Cat. ${t.categoryId}` : 'General' }}</strong></li>
                   <li v-if="t.active">Participación: <strong>Cupo abierto</strong>. Consulta bases y horarios.</li>
                   <li v-else>Torneo finalizado. Consulta los resultados y el ranking.</li>
                 </ul>
               </div>
             </div>
 
-            <div v-if="tournaments.length === 0" class="empty-state text-center text-muted" style="padding:3rem;">
-              No hay eventos disponibles.
+            <div v-if="upcomingEvents.length === 0" class="empty-state text-center text-muted" style="padding:3rem;">
+              No hay eventos próximos disponibles.
             </div>
           </div>
         </section>
@@ -80,14 +80,52 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { getTournaments } from '@/api/tournaments'
-import { getTopMonth } from '@/api/archers'
-import { mockTopArchers, mockTournaments } from '@/data/mock'
-import PodiumTop3 from '@/components/PodiumTop3.vue'
+import { ref, computed, onMounted } from 'vue'
+import { getTournaments } from '../api/tournaments'
+import { getTopMonth, getLeaderboard } from '../api/archers'
+import PodiumTop3 from '../components/PodiumTop3.vue'
 
 const topArchers  = ref([])
 const tournaments = ref([])
+const loading     = ref(true)
+const loadError   = ref(null)
+
+/**
+ * Normalise a LeaderboardDTO (materialized view) to the shape PodiumTop3 expects:
+ *   API:      { globalPosition, archerId, name, tournamentsPlayed, arrowsFired, totalScore, avgPointsPerArrow }
+ *   Banner:   { archerName, avgPointsPerArrow, avatarUrl }
+ */
+function normalizeLeaderboard(a) {
+  return {
+    archerId:          a.archerId,
+    archerName:        a.name ?? 'Arquero',
+    avgPointsPerArrow: a.avgPointsPerArrow ?? 0,
+    avatarUrl:         null,
+  }
+}
+
+/**
+ * Fallback normaliser using top-month data (monthlyScore only).
+ * avgPointsPerArrow is estimated as monthlyScore / typical arrows fired.
+ */
+function normalizeMonthly(a) {
+  return {
+    archerId:          a.archerId,
+    archerName:        a.name ?? 'Arquero',
+    avgPointsPerArrow: a.monthlyScore != null ? +(a.monthlyScore / 75).toFixed(4) : 0,
+    avatarUrl:         null,
+  }
+}
+
+// Show only the next 3 upcoming or active tournaments, sorted by start date
+const upcomingEvents = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return tournaments.value
+    .filter(t => t.active || new Date(t.startDate) >= today)
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+    .slice(0, 3)
+})
 
 function eventDay(t) {
   if (!t.startDate) return '—'
@@ -108,20 +146,44 @@ function formatFullDate(d) {
 }
 
 onMounted(async () => {
-  // Fetch from API, fallback to mock
+  loading.value   = true
+  loadError.value = null
+
+  // ── Top Arqueros: prefer materialized view for real avg/arrow ──────
   try {
-    const res = await getTopMonth()
-    topArchers.value = res.data && res.data.length ? res.data : mockTopArchers
-  } catch {
-    topArchers.value = mockTopArchers
+    const res = await getLeaderboard()
+    const data = Array.isArray(res.data) ? res.data : []
+    if (data.length >= 3) {
+      topArchers.value = data.slice(0, 6).map(normalizeLeaderboard)
+    } else {
+      // Fallback: use top-month endpoint
+      const res2 = await getTopMonth()
+      topArchers.value = (Array.isArray(res2.data) ? res2.data : [])
+        .slice(0, 6)
+        .map(normalizeMonthly)
+    }
+  } catch (e) {
+    console.error('[Home] leaderboard error:', e.message)
+    // Try monthly fallback
+    try {
+      const res2 = await getTopMonth()
+      topArchers.value = (Array.isArray(res2.data) ? res2.data : [])
+        .slice(0, 6)
+        .map(normalizeMonthly)
+    } catch (e2) {
+      loadError.value = 'No se pudo cargar el ranking. Verifica que el backend esté activo.'
+    }
   }
 
+  // ── Tournaments ───────────────────────────────────────────────────
   try {
     const res = await getTournaments()
-    tournaments.value = res.data && res.data.length ? res.data : mockTournaments
-  } catch {
-    tournaments.value = mockTournaments
+    tournaments.value = Array.isArray(res.data) ? res.data : []
+  } catch (e) {
+    console.error('[Home] /tournaments error:', e.message)
   }
+
+  loading.value = false
 })
 </script>
 
