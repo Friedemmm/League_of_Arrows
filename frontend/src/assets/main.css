@@ -1,0 +1,967 @@
+/* ============================================================
+   LEAGUE OF ARROWS — Global Design System
+   Inspired by the League of Legends Launcher aesthetic
+   ============================================================ */
+
+/* ---- Google Fonts are loaded via index.html ---- */
+
+/* ============================================================
+   CSS Custom Properties (Design Tokens)
+   ============================================================ */
+:root {
+  /* LoL Reference Palette */
+  --bg-base:         #0D1117;
+  --bg-navy:         #101823;
+  --bg-panel:        rgba(8, 14, 22, 0.88);
+  --bg-panel-alt:    rgba(10, 16, 26, 0.75);
+
+  /* Borders */
+  --border-subtle:   #1E2A3B;
+  --border-gold:     rgba(200, 155, 60, 0.35);
+
+  /* Gold System */
+  --gold-pale:       #EBDCB2;   /* titles */
+  --gold-mid:        #C8AA6E;   /* table headers */
+  --gold-rich:       #C89B3C;   /* accents */
+  --gold-dim:        rgba(200,155,60,0.25);
+
+  /* Text */
+  --text-title:      #EBDCB2;
+  --text-body:       #7A8CA0;   /* muted greyish-blue */
+  --text-muted:      #4A5568;
+  --text-bright:     #F0E6D3;
+  --text-gold:       #C89B3C;
+
+  /* Cyan Accent (LoL UI glow) */
+  --cyan:            #0BC4E3;
+  --cyan-glow:       rgba(11, 196, 227, 0.5);
+
+  /* Status */
+  --success:         #2ecc71;
+  --danger:          #e74c3c;
+  --warning:         #f39c12;
+
+  /* Glows */
+  --glow-gold:       0 0 8px rgba(200,155,60,0.4), 0 0 20px rgba(200,155,60,0.15);
+  --glow-cyan:       0 0 10px rgba(11,196,227,0.6), 0 0 30px rgba(11,196,227,0.2);
+
+  /* Transitions */
+  --t-fast:  0.15s ease;
+  --t:       0.25s ease;
+  --t-slow:  0.4s ease;
+
+  /* Legacy aliases (keep components working) */
+  --lol-black:       #0D1117;
+  --lol-dark:        #101823;
+  --lol-dark-mid:    #0D1520;
+  --lol-panel:       #101823;
+  --lol-panel-light: #1E2A3B;
+  --lol-border:      #1E2A3B;
+  --lol-gold-dark:   #785a28;
+  --lol-gold:        #C89B3C;
+  --lol-gold-light:  #EBDCB2;
+  --lol-gold-bright: #C8AA6E;
+  --lol-blue:        #0BC4E3;
+  --lol-blue-glow:   #0BC4E3;
+  --lol-blue-dark:   #051820;
+  --text-primary:    #EBDCB2;
+  --text-secondary:  #7A8CA0;
+  --lol-success:     #2ecc71;
+  --lol-danger:      #e74c3c;
+  --lol-warning:     #f39c12;
+  --lol-info:        #3498db;
+  --glow-sm:         0 0 4px rgba(200,155,60,0.4);
+  --transition-fast: 0.15s ease;
+  --transition:      0.25s ease;
+  --transition-slow: 0.4s ease;
+
+  /* Layout */
+  --header-height:   64px;
+  --sidebar-width:   240px;
+  --border-radius:   2px;
+  --border-radius-lg: 4px;
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Dark navy base — aurora overlay handled by App.vue */
+  background: #061018;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   Typography
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-title);
+  letter-spacing: 0.08em;
+}
+
+/* Title sizes */
+h1 { font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: 0.12em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); }
+h3 { font-size: clamp(1.1rem, 2vw, 1.6rem); }
+h4 { font-size: 1.15rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.9rem; }
+
+p {
+  line-height: 1.7;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-body);
+}
+
+a {
+  color: var(--gold-rich);
+  text-decoration: none;
+  transition: color var(--t-fast);
+}
+
+a:hover {
+  color: var(--gold-mid);
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--lol-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--lol-gold-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lol-gold);
+}
+
+/* ============================================================
+   Layout Utilities
+   ============================================================ */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.page-wrapper {
+  min-height: calc(100vh - var(--header-height));
+  padding-top: calc(var(--header-height) + 2rem);
+  padding-bottom: 4rem;
+}
+
+/* ============================================================
+   Section Titles — Unified LoL Reference Style
+   ============================================================ */
+.section-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  color: #EBDCB2;                  /* pale gold/cream */
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: block;
+  position: relative;
+  padding-bottom: 14px;            /* space between text and divider */
+  margin-bottom: 0.6rem;
+  /* No transform or scale */
+}
+
+/* ── Static faded gold divider (always visible) ── */
+.section-title::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent        0%,
+    rgba(200,170,110,0.5) 20%,
+    rgba(200,170,110,0.5) 80%,
+    transparent        100%
+  );
+}
+
+/* ── Hover loading sweep (left → right, 0.3s ease-out) ── */
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;                        /* starts collapsed */
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent     0%,
+    #C89B3C        15%,
+    #EBDCB2        50%,
+    #C89B3C        85%,
+    transparent    100%
+  );
+  transform-origin: left center;
+  transition: none;                /* no transition by default → instant reset on leave */
+}
+
+/* Hover on the title OR its .section-header wrapper */
+.section-title:hover::after,
+.section-header:hover .section-title::after {
+  width: 100%;
+  transition: width 0.3s ease-out; /* animate only on enter */
+}
+
+/* When inside a .section-header, the hr.header-rule is the divider —
+   suppress the pseudo-element lines on the h1 */
+.section-header .section-title {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+.section-header .section-title::before,
+.section-header .section-title::after { display: none; }
+
+/* ============================================================
+   Unified Section Header Layout (global)
+   title / [subtitle ·········· button] / ─── rule ───
+   ============================================================ */
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 1.5rem;
+}
+
+/* Row: subtitle left — button/action right */
+.section-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.2rem;
+}
+
+/* section-subtitle inside meta-row: no bottom margin (rule handles spacing) */
+.section-meta-row .section-subtitle {
+  margin-bottom: 0;
+}
+
+/* Full-width gold gradient rule */
+.header-rule {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  border: none;
+  background: linear-gradient(
+    to right,
+    rgba(200,170,110,0.5) 0%,
+    rgba(200,170,110,0.5) 85%,
+    transparent 100%
+  );
+  margin: 0.4rem 0 0 0;
+  overflow: visible;
+}
+
+/* Animated loading sweep layer — grows scaleX(0→1) from left on hover */
+.header-rule::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #C89B3C 0%,
+    #EBDCB2 50%,
+    #C89B3C 85%,
+    transparent 100%
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: none;               /* instant reset on mouse-leave */
+}
+
+.section-header:hover .header-rule::after {
+  transform: scaleX(1);
+  transition: transform 0.35s ease-out; /* sweeps on enter only */
+}
+
+/* Subtitle beneath section titles */
+.section-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-body);
+  letter-spacing: 0.04em;
+  font-style: normal;              /* NOT italic */
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+  margin-bottom: 1.2rem;
+}
+
+/* ── Standalone gold gradient divider line (for use outside titles) ── */
+.gold-divider,
+.section-divider {
+  width: 100%;
+  height: 1px;
+  border: none;
+  background: linear-gradient(to right, transparent, rgba(200,170,110,0.45), transparent);
+  margin: 1.2rem 0;
+}
+
+/* section-title-bar kept for backward compat — hidden (::before handles it now) */
+.section-title-bar { display: none; }
+
+
+/* ============================================================
+   Gold Divider
+   ============================================================ */
+.gold-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lol-gold), transparent);
+  margin: 2rem 0;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   Glass Card — dark panel style
+   ============================================================ */
+.lol-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--t);
+}
+
+.lol-card:hover {
+  border-color: var(--border-gold);
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.btn:hover::after { opacity: 1; }
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--lol-gold-dark), var(--lol-gold));
+  color: var(--lol-black);
+  box-shadow: 0 2px 8px rgba(200,155,60,0.3);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, var(--lol-gold), var(--lol-gold-bright));
+  box-shadow: var(--glow-gold);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--lol-gold);
+  border: 1px solid var(--lol-gold-dark);
+}
+
+.btn-outline:hover {
+  border-color: var(--lol-gold);
+  color: var(--lol-gold-bright);
+  box-shadow: var(--glow-sm);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: rgba(200,155,60,0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--lol-border);
+}
+
+.btn-ghost:hover {
+  background: rgba(200,155,60,0.1);
+  color: var(--text-primary);
+  border-color: var(--lol-gold-dark);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #7b1a1a, var(--lol-danger));
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, var(--lol-danger), #ff6b6b);
+  box-shadow: 0 0 12px rgba(231,76,60,0.5);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.75rem;
+}
+
+.btn-lg {
+  padding: 0.85rem 2.2rem;
+  font-size: 0.95rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ============================================================
+   Form Elements
+   ============================================================ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-gold);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  background: rgba(1, 10, 19, 0.8);
+  border: 1px solid var(--lol-border);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  padding: 0.65rem 0.9rem;
+  width: 100%;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  appearance: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--lol-gold);
+  box-shadow: 0 0 0 2px rgba(200, 155, 60, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-select option {
+  background: var(--lol-panel);
+  color: var(--text-primary);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ============================================================
+   Table — Leaderboard reference style
+   ============================================================ */
+.lol-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius);
+}
+
+.lol-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.lol-table thead {
+  background: var(--bg-panel-alt);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.lol-table thead th {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold-mid);
+  padding: 0.9rem 1.2rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.lol-table tbody tr {
+  border-bottom: 1px solid rgba(30, 42, 59, 0.6);
+  transition: background var(--t-fast);
+}
+
+.lol-table tbody tr:hover {
+  background: rgba(30, 42, 59, 0.4);
+}
+
+.lol-table tbody td {
+  padding: 0.85rem 1.2rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-body);
+  vertical-align: middle;
+}
+
+.lol-table tbody td:first-child {
+  color: var(--text-title);
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+}
+
+/* ============================================================
+   Badge
+   ============================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: 'Cinzel', serif;
+}
+
+.badge-gold {
+  background: rgba(200,155,60,0.15);
+  color: var(--lol-gold-bright);
+  border: 1px solid rgba(200,155,60,0.3);
+}
+
+.badge-blue {
+  background: rgba(5,150,170,0.15);
+  color: var(--lol-blue-glow);
+  border: 1px solid rgba(5,150,170,0.3);
+}
+
+.badge-success {
+  background: rgba(46,204,113,0.12);
+  color: var(--lol-success);
+  border: 1px solid rgba(46,204,113,0.3);
+}
+
+.badge-danger {
+  background: rgba(231,76,60,0.12);
+  color: var(--lol-danger);
+  border: 1px solid rgba(231,76,60,0.3);
+}
+
+.badge-muted {
+  background: rgba(92,100,120,0.2);
+  color: var(--text-muted);
+  border: 1px solid rgba(92,100,120,0.3);
+}
+
+/* ============================================================
+   Modal Overlay
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 10, 19, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: linear-gradient(135deg, var(--lol-dark-mid), var(--lol-panel));
+  border: 1px solid var(--lol-gold-dark);
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.8), var(--glow-gold);
+}
+
+.modal-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--lol-gold), transparent);
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--lol-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 1.1rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color var(--transition-fast);
+  padding: 0.2rem;
+}
+
+.modal-close:hover { color: var(--lol-gold); }
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--lol-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ============================================================
+   Stat Cards
+   ============================================================ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--lol-dark-mid), var(--lol-panel));
+  border: 1px solid var(--lol-border);
+  border-radius: var(--border-radius);
+  padding: 1.2rem 1.4rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--lol-gold-dark), var(--lol-gold));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--lol-gold-dark);
+  transform: translateY(-2px);
+}
+
+.stat-card:hover::after {
+  transform: scaleX(1);
+}
+
+.stat-value {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--lol-gold-bright);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   Alert / Notice
+   ============================================================ */
+.alert {
+  padding: 0.85rem 1.2rem;
+  border-radius: var(--border-radius);
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.alert-error {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  color: #ff8a80;
+}
+
+.alert-success {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.35);
+  color: #69f0ae;
+}
+
+.alert-info {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.35);
+  color: #82b1ff;
+}
+
+/* ============================================================
+   Loading Spinner
+   ============================================================ */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(200,155,60,0.15);
+  border-top-color: var(--lol-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 3rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* ============================================================
+   Podium
+   ============================================================ */
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 2rem 0;
+}
+
+.podium-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.podium-rank {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.podium-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.podium-score {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.podium-block {
+  width: 90px;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.podium-1 .podium-rank { color: var(--lol-gold-bright); }
+.podium-1 .podium-block {
+  height: 120px;
+  background: linear-gradient(180deg, rgba(200,155,60,0.2), rgba(200,155,60,0.05));
+  border: 1px solid rgba(200,155,60,0.5);
+  box-shadow: var(--glow-gold);
+}
+
+.podium-2 .podium-rank { color: #c0c0c0; }
+.podium-2 .podium-block {
+  height: 90px;
+  background: linear-gradient(180deg, rgba(192,192,192,0.15), rgba(192,192,192,0.03));
+  border: 1px solid rgba(192,192,192,0.3);
+}
+
+.podium-3 .podium-rank { color: #cd7f32; }
+.podium-3 .podium-block {
+  height: 65px;
+  background: linear-gradient(180deg, rgba(205,127,50,0.15), rgba(205,127,50,0.03));
+  border: 1px solid rgba(205,127,50,0.3);
+}
+
+/* ============================================================
+   Transitions (Vue)
+   ============================================================ */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ============================================================
+   Animated Background Particles
+   ============================================================ */
+.particle-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--lol-gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: float-particle var(--dur, 8s) var(--delay, 0s) infinite ease-in-out;
+}
+
+@keyframes float-particle {
+  0%   { opacity: 0; transform: translateY(100vh) scale(0); }
+  20%  { opacity: 0.4; }
+  80%  { opacity: 0.2; }
+  100% { opacity: 0; transform: translateY(-20px) scale(1.5); }
+}
+
+/* ============================================================
+   Misc Utilities
+   ============================================================ */
+.text-gold    { color: var(--lol-gold); }
+.text-gold-bright { color: var(--lol-gold-bright); }
+.text-muted   { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.text-danger  { color: var(--lol-danger); }
+.text-success { color: var(--lol-success); }
+.text-center  { text-align: center; }
+.text-right   { text-align: right; }
+
+.flex         { display: flex; }
+.flex-center  { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.gap-1        { gap: 0.5rem; }
+.gap-2        { gap: 1rem; }
+.gap-3        { gap: 1.5rem; }
+.mt-1         { margin-top: 0.5rem; }
+.mt-2         { margin-top: 1rem; }
+.mt-3         { margin-top: 1.5rem; }
+.mt-4         { margin-top: 2rem; }
+.mb-1         { margin-bottom: 0.5rem; }
+.mb-2         { margin-bottom: 1rem; }
+.mb-3         { margin-bottom: 1.5rem; }
+.mb-4         { margin-bottom: 2rem; }
+.w-full       { width: 100%; }
+.grid-2       { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid-3       { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.grid-4       { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .container { padding: 0 1rem; }
+}
