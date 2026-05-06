@@ -1,4 +1,6 @@
-node_modules/
-.idea/
+### VS Code ###
+.idea
+.vscode/
+frontend/.vite/
 dist/
-.vite/
+frontend/dist/
