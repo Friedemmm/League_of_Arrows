@@ -47,12 +47,7 @@
         </div>
       </div>
 
-      <!-- Navigation shortcuts -->
-      <div class="profile-actions mt-3">
-        <RouterLink to="/history"  class="btn btn-outline" id="profile-btn-history">Ver Historial</RouterLink>
-        <RouterLink to="/leaderboard" class="btn btn-outline" id="profile-btn-leaderboard">Leaderboard</RouterLink>
-        <button class="btn btn-danger" id="profile-btn-logout" @click="handleLogout">Cerrar Sesión</button>
-      </div>
+
     </div>
   </div>
 </template>

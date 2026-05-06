@@ -23,7 +23,7 @@
               :class="{ active: tab === 'monthly' }"
               @click="tab = 'monthly'"
             >
-              Top 5 mejores del Mes
+              Top 10 Mejores del Mes
             </button>
           </div>
         </div>
@@ -93,6 +93,12 @@
         <!-- ══ MONTHLY TAB — top performers last 30 days ══ -->
         <template v-else>
 
+          <div class="daily-info-bar">
+            <p class="daily-description">
+              TOP 10 MEJORES SUMA DE PUNTOS POR FLECHAS DEL MES
+            </p>
+          </div>
+
           <div class="lol-table-wrapper">
             <table class="lol-table" id="leaderboard-monthly-table">
               <thead>
@@ -123,6 +129,7 @@
             </table>
           </div>
         </template>
+
 
       </template>
     </div>

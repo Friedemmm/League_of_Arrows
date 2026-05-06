@@ -42,7 +42,7 @@ public class SecurityConfig {
 
                         // Rutas especificas
                         .requestMatchers(HttpMethod.GET, "/api/archers/me/history").hasRole("ARQUERO")
-                        .requestMatchers("/api/tournaments/*/podium").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/tournaments/*/podium").permitAll()
 
                         // Rutas generales
                         .requestMatchers(HttpMethod.POST, "/api/tournaments/**").hasRole("ADMIN")

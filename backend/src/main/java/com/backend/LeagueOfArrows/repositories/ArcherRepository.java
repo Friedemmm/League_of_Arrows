@@ -105,10 +105,9 @@ public class ArcherRepository {
             a.name,
             SUM(ar.score) AS monthly_score
         FROM rounds ro
-        INNER JOIN arrows       ar ON ar.id_round     = ro.id_round
-        INNER JOIN archers      a  ON a.id_archer      = ro.id_archer
-        INNER JOIN tournaments  t  ON t.id_tournament  = ro.id_tournament
-        WHERE t.start_date >= NOW() - INTERVAL '1 month'
+        INNER JOIN arrows  ar ON ar.id_round = ro.id_round
+        INNER JOIN archers a  ON a.id_archer  = ro.id_archer
+        WHERE DATE_TRUNC('month', ro.registered_at) = DATE_TRUNC('month', NOW())
         GROUP BY a.id_archer, a.name
         ORDER BY monthly_score DESC
         LIMIT 10

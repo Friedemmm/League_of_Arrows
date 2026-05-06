@@ -73,28 +73,6 @@
 
       </form>
 
-      <!-- ── Dev quick-fill section ── -->
-      <div class="dev-section">
-        <p class="dev-label">Cuentas de prueba</p>
-        <div class="dev-buttons">
-          <button
-            class="dev-btn dev-btn--admin"
-            type="button"
-            id="btn-autofill-admin"
-            @click="autofill('admin')"
-          >
-            ⚙ Auto-fill Admin
-          </button>
-          <button
-            class="dev-btn dev-btn--archer"
-            type="button"
-            id="btn-autofill-archer"
-            @click="autofill('archer')"
-          >
-            🏹 Auto-fill Archer
-          </button>
-        </div>
-      </div>
 
       <!-- ── Back to home ── -->
       <div class="back-row">
