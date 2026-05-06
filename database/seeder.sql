@@ -1,4 +1,7 @@
 -- megaseeder
+
+TRUNCATE TABLE audit_log, rankings, arrows, rounds, inscriptions, tournaments, archers, categories, users RESTART IDENTITY CASCADE;
+
 INSERT INTO categories (name) VALUES 
 ('Largo'),
 ('Recurvo'),
