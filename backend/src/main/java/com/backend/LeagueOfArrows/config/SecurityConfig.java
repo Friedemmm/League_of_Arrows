@@ -35,10 +35,13 @@ public class SecurityConfig {
 
                         // Rutas publicas
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tournaments").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/archers/top-month").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/archers/leaderboard").permitAll()
 
                         // Rutas especificas
                         .requestMatchers(HttpMethod.GET, "/api/archers/me/history").hasRole("ARQUERO")
-                        .requestMatchers(HttpMethod.GET, "/api/archers/top-month").authenticated()
                         .requestMatchers("/api/tournaments/*/podium").authenticated()
 
                         // Rutas generales
@@ -51,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/inscriptions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/inscriptions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/rounds/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,  "/api/audit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,  "/api/tournaments/*/rankings").authenticated()
 
 
                         // Cualquier otra ruta requiere autenticacion

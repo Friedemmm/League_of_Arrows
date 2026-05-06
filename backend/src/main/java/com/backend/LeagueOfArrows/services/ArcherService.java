@@ -63,4 +63,8 @@ public class ArcherService  {
     public List<TopArcherDTO> getTopArchersLastMonth() {
         return archerRepository.findTopArchersLastMonth();
     }
+
+    public List<com.backend.LeagueOfArrows.dtos.LeaderboardDTO> getHistoricalLeaderboard() {
+        return archerRepository.findHistoricalLeaderboard();
+    }
 }

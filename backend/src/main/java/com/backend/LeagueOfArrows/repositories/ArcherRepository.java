@@ -1,5 +1,6 @@
 package com.backend.LeagueOfArrows.repositories;
 
+import com.backend.LeagueOfArrows.dtos.LeaderboardDTO;
 import com.backend.LeagueOfArrows.dtos.TopArcherDTO;
 import com.backend.LeagueOfArrows.entities.ArcherEntity;
 import com.backend.LeagueOfArrows.dtos.HistoryDTO;
@@ -22,12 +23,21 @@ public class ArcherRepository {
         archer.setUserId(rs.getLong("id_user"));
         archer.setName(rs.getString("name"));
         archer.setCategoryId(rs.getObject("id_category", Long.class));
+        // enriched fields (may be absent in single-row queries)
+        try { archer.setCategoryName(rs.getString("category_name")); } catch (Exception ignored) {}
+        try { archer.setEmail(rs.getString("email")); }              catch (Exception ignored) {}
         return archer;
     };
 
     public List<ArcherEntity> findAll() {
-        return jdbc.query(
-                "SELECT * FROM archers", archerRowMapper);
+        String sql = """
+            SELECT a.*, c.name AS category_name, u.email
+            FROM archers a
+            LEFT JOIN categories c ON c.id_category = a.id_category
+            LEFT JOIN users      u ON u.id_user      = a.id_user
+            ORDER BY a.id_archer
+            """;
+        return jdbc.query(sql, archerRowMapper);
     }
 
 
@@ -93,18 +103,49 @@ public class ArcherRepository {
         SELECT
             a.id_archer,
             a.name,
-            SUM(i.score) AS monthly_score
-        FROM inscriptions i
-        INNER JOIN archers a      ON i.id_archer     = a.id_archer
-        INNER JOIN tournaments t  ON i.id_tournament = t.id_tournament
+            SUM(ar.score) AS monthly_score
+        FROM rounds ro
+        INNER JOIN arrows       ar ON ar.id_round     = ro.id_round
+        INNER JOIN archers      a  ON a.id_archer      = ro.id_archer
+        INNER JOIN tournaments  t  ON t.id_tournament  = ro.id_tournament
         WHERE t.start_date >= NOW() - INTERVAL '1 month'
         GROUP BY a.id_archer, a.name
         ORDER BY monthly_score DESC
+        LIMIT 10
         """;
         return jdbc.query(sql, (rs, n) -> new TopArcherDTO(
                 rs.getLong("id_archer"),
                 rs.getString("name"),
                 rs.getInt("monthly_score")
+        ));
+    }
+
+    public List<LeaderboardDTO> findHistoricalLeaderboard() {
+        String sql = """
+        SELECT
+            CAST(ROW_NUMBER() OVER (ORDER BY ROUND(AVG(ar.score)::NUMERIC, 4) DESC) AS INT)
+                AS posicion_global,
+            a.id_archer,
+            a.name            AS nombre,
+            COUNT(DISTINCT r.id_tournament) AS torneos_jugados,
+            COUNT(ar.id_arrow)              AS flechas_lanzadas,
+            SUM(ar.score)                   AS puntaje_total,
+            ROUND(AVG(ar.score)::NUMERIC, 4) AS promedio_por_flecha
+        FROM archers a
+        JOIN rounds r  ON r.id_archer = a.id_archer
+        JOIN arrows ar ON ar.id_round  = r.id_round
+        GROUP BY a.id_archer, a.name
+        ORDER BY promedio_por_flecha DESC
+        LIMIT 50
+        """;
+        return jdbc.query(sql, (rs, n) -> new LeaderboardDTO(
+                rs.getInt("posicion_global"),
+                rs.getLong("id_archer"),
+                rs.getString("nombre"),
+                rs.getInt("torneos_jugados"),
+                rs.getInt("flechas_lanzadas"),
+                rs.getInt("puntaje_total"),
+                rs.getBigDecimal("promedio_por_flecha")
         ));
     }
 

@@ -149,17 +149,18 @@ DECLARE
     v_modified_by BIGINT;
     v_user_setting TEXT;
 BEGIN
-    -- Only audit if there was an actual change
-    IF OLD.score = NEW.score THEN
+    -- Skip audit if score didn't change (UPDATE with same value)
+    IF TG_OP = 'UPDATE' AND OLD.score = NEW.score THEN
         RETURN NEW;
     END IF;
 
-    -- Get the User ID from the session variable
+    -- Get the User ID from the session variable (set by Spring before the CALL)
     v_user_setting := current_setting('app.current_user_id', true);
-    IF v_user_setting IS NULL OR v_user_setting = '' THEN
-        RAISE EXCEPTION 'Auditoría fallida: falta app.current_user_id en la sesión.';
+    IF v_user_setting IS NOT NULL AND v_user_setting <> '' THEN
+        v_modified_by := v_user_setting::BIGINT;
+    ELSE
+        v_modified_by := NULL;  -- log without admin ID rather than crashing
     END IF;
-    v_modified_by := v_user_setting::BIGINT;
 
     -- Get tournament and archer from the round associated with the arrow
     SELECT id_tournament, id_archer INTO v_round_record
@@ -167,11 +168,13 @@ BEGIN
     WHERE id_round = NEW.id_round;
 
     -- Insert into audit_log table
+    -- For INSERT: old_score = 0 (arrow is new)
+    -- For UPDATE: old_score = previous value
     INSERT INTO audit_log (id_archer, id_tournament, old_score, new_score, modified_by, modified_at)
     VALUES (
         v_round_record.id_archer,
         v_round_record.id_tournament,
-        OLD.score,
+        CASE WHEN TG_OP = 'INSERT' THEN 0 ELSE OLD.score END,
         NEW.score,
         v_modified_by,
         CURRENT_TIMESTAMP
@@ -183,7 +186,7 @@ $$;
 
 DROP TRIGGER IF EXISTS trg_audit_score_modification ON arrows;
 CREATE TRIGGER trg_audit_score_modification
-AFTER UPDATE ON arrows
+AFTER INSERT OR UPDATE ON arrows
 FOR EACH ROW
 EXECUTE FUNCTION fn_audit_score_modification();
 
