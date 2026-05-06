@@ -1,4 +1,4 @@
--- megaseeder
+-- Seeder
 
 TRUNCATE TABLE audit_log, rankings, arrows, rounds, inscriptions, tournaments, archers, categories, users RESTART IDENTITY CASCADE;
 
