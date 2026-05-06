@@ -1,0 +1,79 @@
+version: "3.9"
+
+# ════════════════════════════════════════════════════════════════
+#  League of Arrows — Docker Compose
+#  Servicios: PostgreSQL 16 · Spring Boot 3 · Vue 3 + Nginx
+# ════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── 1. Base de datos PostgreSQL ────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: loa_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-league_of_arrows}
+      POSTGRES_USER:     ${POSTGRES_USER:-loa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-loa_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Scripts ejecutados en orden al crear la BD por primera vez
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./database/logic.sql:/docker-entrypoint-initdb.d/02_logic.sql:ro
+      - ./database/megaseeder:/docker-entrypoint-initdb.d/03_seeder.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - loa_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-loa_user} -d ${POSTGRES_DB:-league_of_arrows}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ── 2. Backend Spring Boot ──────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: loa_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL:      jdbc:postgresql://db:5432/${POSTGRES_DB:-league_of_arrows}
+      DB_USER:     ${POSTGRES_USER:-loa_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-loa_pass}
+      JWT_SECRET:  ${JWT_SECRET:-esta-es-la-clave-para-el-lab-de-tbd-de-gestion-de-tiro-con-arco-gracias-jwt}
+    ports:
+      - "8080:8080"
+    networks:
+      - loa_network
+
+  # ── 3. Frontend Vue 3 + Nginx ───────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: loa_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - loa_network
+
+# ── Red interna ────────────────────────────────────────────────
+networks:
+  loa_network:
+    name: loa_network
+    driver: bridge
+
+# ── Volúmenes persistentes ─────────────────────────────────────
+volumes:
+  postgres_data:
+    name: loa_postgres_data

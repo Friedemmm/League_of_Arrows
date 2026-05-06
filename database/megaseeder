@@ -41,7 +41,7 @@ INSERT INTO tournaments (name, id_category, start_date, end_date, is_active) VAL
 ('MSI 2025', 1, '2025-10-20', '2025-11-05', FALSE),
 ('Torneo 2024', 2, '2024-07-25', '2024-08-11', FALSE),
 ('Torneo 2023', 3, '2023-04-10', '2023-04-15', FALSE),
-('Torneo 2022', 4, '2022-04-10', '2022-04-15', FALSE),
+('Torneo 2022', 4, '2022-04-10', '2022-04-15', FALSE);
 
 INSERT INTO inscriptions (id_archer, id_tournament, score) VALUES 
 (1, 1, 58),
