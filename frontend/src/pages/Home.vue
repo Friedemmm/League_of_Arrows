@@ -27,7 +27,7 @@
           <div class="section-header">
             <h1 class="section-title home-section-title">Eventos</h1>
             <div class="section-meta-row">
-              <p class="section-subtitle">Próximos 3 eventos</p>
+              <p class="section-subtitle">Últimos 3 eventos registrados</p>
               <RouterLink to="/tournaments" class="link-more" id="link-calendario">
                 Calendario <span class="arrow">›</span>
               </RouterLink>
@@ -46,8 +46,9 @@
               <div class="evento-date-col">
                 <span class="evento-day">{{ eventDay(t) }}</span>
                 <span class="evento-month-year">{{ eventMonthYear(t) }}</span>
-                <span class="evento-status" :class="t.active ? 'status-active' : 'status-ended'">
-                  {{ t.active ? 'En Curso' : 'Finalizado' }}
+                <span class="evento-status"
+                  :class="t.active ? 'status-active' : (isUpcoming(t) ? 'status-upcoming' : 'status-ended')">
+                  {{ t.active ? 'En Curso' : (isUpcoming(t) ? 'Próximo' : 'Finalizado') }}
                 </span>
               </div>
 
@@ -55,13 +56,13 @@
               <div class="evento-card">
                 <div class="evento-card-top">
                   <div class="evento-badges">
-                    <span class="badge badge-blue">{{ t.categoryId ? `Cat. ${t.categoryId}` : 'General' }}</span>
+                    <span class="badge badge-blue">{{ t.categoryName || 'General' }}</span>
                     <span class="evento-full-date">{{ formatFullDate(t.startDate) }}</span>
                   </div>
                 </div>
                 <h3 class="evento-name">{{ t.name }}</h3>
                 <ul class="evento-details">
-                  <li>Categoría: <strong>{{ t.categoryId ? `Cat. ${t.categoryId}` : 'General' }}</strong></li>
+                  <li>Categoría: <strong>{{ t.categoryName || 'General' }}</strong></li>
                   <li v-if="t.active">Participación: <strong>Cupo abierto</strong>. Consulta bases y horarios.</li>
                   <li v-else>Torneo finalizado. Consulta los resultados y el ranking.</li>
                 </ul>
@@ -117,15 +118,33 @@ function normalizeMonthly(a) {
   }
 }
 
-// Show only the next 3 upcoming or active tournaments, sorted by start date
-const upcomingEvents = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return tournaments.value
-    .filter(t => t.active || new Date(t.startDate) >= today)
-    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+// Priority: active (1st) → upcoming soonest (2nd) → past most recent (3rd)
+// Always ensures the active tournament shows if one exists.
+function tournamentPriority(t) {
+  if (t.active) return 0
+  if (isUpcoming(t)) return 1
+  return 2
+}
+
+const upcomingEvents = computed(() =>
+  [...tournaments.value]
+    .sort((a, b) => {
+      const pa = tournamentPriority(a), pb = tournamentPriority(b)
+      if (pa !== pb) return pa - pb
+      // Within same priority: upcoming → soonest first; past → most recent first
+      return pa === 1
+        ? new Date(a.startDate) - new Date(b.startDate)
+        : new Date(b.startDate) - new Date(a.startDate)
+    })
     .slice(0, 3)
-})
+)
+
+const today = new Date()
+today.setHours(0, 0, 0, 0)
+
+function isUpcoming(t) {
+  return !t.active && new Date(t.startDate) > today
+}
 
 function eventDay(t) {
   if (!t.startDate) return '—'
@@ -194,12 +213,12 @@ onMounted(async () => {
 .home-page {
   position: relative;
   overflow-x: hidden;
-  /* Top padding accounts for the fixed header + breathing room.
-     Applied here (not on .top-section) so BOTH columns start at
-     the identical vertical position — this is the alignment fix. */
   padding: calc(var(--header-height) + 2rem) 0 4rem;
   min-height: 100vh;
 }
+
+/* Content sits above the global aurora from App.vue */
+.home-page > * { position: relative; z-index: 1; }
 
 /* ── Two-column grid ─────────────────────────────────────────
    LEFT  62% : podium  (larger share so banners have room)
@@ -498,8 +517,9 @@ onMounted(async () => {
   margin-top: 6px;
 }
 
-.status-active { color: var(--lol-success, #0ac8b9); }
-.status-ended  { color: var(--text-muted); }
+.status-active   { color: var(--lol-success, #0ac8b9); }
+.status-upcoming  { color: var(--lol-blue-glow, #00d4ff); }
+.status-ended     { color: var(--text-muted); }
 
 /* Right event card */
 .evento-card {

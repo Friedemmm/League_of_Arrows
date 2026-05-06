@@ -5,14 +5,14 @@
       <!-- ══ Welcome Banner ══ -->
       <div class="welcome-banner lol-card mb-4">
         <div class="welcome-left">
-          <span class="welcome-tag">{{ auth.isAdmin ? 'Administrator' : 'Archer' }}</span>
+          <span class="welcome-tag">{{ auth.isAdmin ? 'Administrador' : 'Arquero' }}</span>
           <h1 class="welcome-title">
-            Welcome back,&nbsp;<span class="text-gold">{{ displayName }}</span>
+            Bienvenido,&nbsp;<span class="text-gold">{{ displayName }}</span>
           </h1>
           <p class="welcome-sub">
             {{ auth.isAdmin
-              ? 'Manage tournaments, archers, and rankings from your admin panel.'
-              : 'Track your performance across tournaments and climb the leaderboard.' }}
+              ? 'Gestiona torneos, arqueros y rankings desde tu panel de administrador.'
+              : 'Sigue tu rendimiento en los torneos y escala en el leaderboard.' }}
           </p>
         </div>
         <div class="welcome-crest" aria-hidden="true">
@@ -47,19 +47,23 @@
       <!-- ══ ARCHER: Stats + Navigation ══ -->
       <template v-else>
 
-        <!-- Summary cards (3 cards, centered) -->
+        <!-- Summary cards (4 cards, centered) -->
         <div class="stat-grid stat-grid--centered">
           <div class="stat-card">
             <div class="stat-value">{{ archerStats.tournaments }}</div>
-            <div class="stat-label">Tournaments Entered</div>
+            <div class="stat-label">Torneos Jugados</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">{{ archerStats.totalScore }}</div>
-            <div class="stat-label">Total Points</div>
+            <div class="stat-label">Puntos Totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ archerStats.bestPosition }}</div>
+            <div class="stat-label">Mejor Posición</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">{{ archerStats.avgScore }}</div>
-            <div class="stat-label">Avg. Score</div>
+            <div class="stat-label">Prom. Puntaje</div>
           </div>
         </div>
 
@@ -68,8 +72,8 @@
           <RouterLink to="/profile" class="archer-nav-btn lol-card" id="dashboard-btn-info">
             <span class="material-icons anb-icon">person</span>
             <div class="anb-body">
-              <span class="anb-title">My Information</span>
-              <span class="anb-desc">View your profile and account details.</span>
+              <span class="anb-title">Mi Información</span>
+              <span class="anb-desc">Ver tu perfil y datos de cuenta.</span>
             </div>
             <span class="material-icons anb-arrow">arrow_forward</span>
           </RouterLink>
@@ -77,8 +81,8 @@
           <RouterLink to="/history" class="archer-nav-btn lol-card" id="dashboard-btn-history">
             <span class="material-icons anb-icon">history</span>
             <div class="anb-body">
-              <span class="anb-title">My History</span>
-              <span class="anb-desc">Review your tournament performance record.</span>
+              <span class="anb-title">Mi Historial</span>
+              <span class="anb-desc">Revisa tu historial de rendimiento en torneos.</span>
             </div>
             <span class="material-icons anb-arrow">arrow_forward</span>
           </RouterLink>
@@ -106,37 +110,37 @@ const adminLinks = [
     id:        'archers',
     icon:      'group',
     iconClass: 'icon-cyan',
-    label:     'Manage Archers',
-    desc:      'Create, edit and remove archer profiles.',
+    label:     'Gestionar Arqueros',
+    desc:      'Crea, edita y elimina perfiles de arqueros.',
   },
   {
     to:        '/admin/tournaments',
     id:        'events',
     icon:      'emoji_events',
     iconClass: 'icon-gold',
-    label:     'Manage Events',
-    desc:      'Create and manage active tournaments.',
+    label:     'Gestionar Eventos',
+    desc:      'Crea y administra torneos activos.',
   },
   {
     to:        '/admin/scoring',
     id:        'scoring',
     icon:      'sports_score',
     iconClass: 'icon-green',
-    label:     'Score Registration',
-    desc:      'Register round scores for archers.',
+    label:     'Registro de Puntajes',
+    desc:      'Registra puntajes de rondas para arqueros.',
   },
   {
     to:        '/admin/audit',
     id:        'audit',
     icon:      'policy',
     iconClass: 'icon-red',
-    label:     'Audit Table',
-    desc:      'View read-only log of score modifications.',
+    label:     'Auditoría',
+    desc:      'Ver registro de modificaciones de puntajes.',
   },
 ]
 
 // ── Archer stats ──────────────────────────────────────────────────────
-const archerStats = reactive({ tournaments: '—', totalScore: '—', avgScore: '—' })
+const archerStats = reactive({ tournaments: '—', totalScore: '—', bestPosition: '—', avgScore: '—' })
 
 onMounted(async () => {
   if (!auth.isAdmin) {
@@ -148,6 +152,8 @@ onMounted(async () => {
       archerStats.totalScore  = scores.reduce((a, b) => a + b, 0)
       archerStats.avgScore    = history.length
         ? (archerStats.totalScore / history.length).toFixed(1) : '—'
+      const positions = history.map(h => h.position).filter(p => p != null && p > 0)
+      archerStats.bestPosition = positions.length ? Math.min(...positions) : '—'
     } catch { /* not critical */ }
   }
 })
@@ -160,6 +166,11 @@ onMounted(async () => {
 .dashboard-page {
   padding: calc(var(--header-height) + 2rem) 0 4rem;
   min-height: 100vh;
+  /* Fog effect — layered over the aurora background */
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%,   rgba(1,10,19,0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 20% 100%,  rgba(1,10,19,0.45) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%,  rgba(1,10,19,0.40) 0%, transparent 70%);
 }
 
 /* ── Welcome Banner ─────────────────────────────────────────── */

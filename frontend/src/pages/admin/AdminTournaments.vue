@@ -4,19 +4,19 @@
 
       <!-- Page header -->
       <div class="admin-page-header">
-        <button class="btn-back" id="btn-back-tournaments" @click="$router.back()">
+        <button class="btn-back" id="btn-back-tournaments" @click="$router.push('/dashboard')">
           <span class="material-icons">arrow_back</span> Back
         </button>
         <div class="header-row">
           <div>
             <h1 class="page-title">
               <span class="material-icons page-title-icon">emoji_events</span>
-              Manage Events
+              Gestionar Eventos
             </h1>
-            <p class="page-subtitle">Create and manage tournaments — past, present, and future.</p>
+            <p class="page-subtitle">Crea y administra torneos: pasados, presentes y futuros.</p>
           </div>
           <button class="btn btn-gold" id="btn-add-tournament" @click="openCreate">
-            <span class="material-icons btn-icon">add_circle</span> New Tournament
+            <span class="material-icons btn-icon">add_circle</span> Nuevo Torneo
           </button>
         </div>
         <hr class="page-rule" />
@@ -29,12 +29,12 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -49,6 +49,13 @@
               </td>
               <td>
                 <div class="flex gap-1">
+                  <!-- Inscribir arquero -->
+                  <button class="btn btn-gold btn-sm icon-btn"
+                    :id="`btn-inscribe-tournament-${t.tournamentId}`"
+                    @click="openInscribe(t)"
+                    title="Inscribir arquero">
+                    <span class="material-icons">person_add</span>
+                  </button>
                   <button class="btn btn-ghost btn-sm icon-btn"
                     :id="`btn-edit-tournament-${t.tournamentId}`" @click="openEdit(t)">
                     <span class="material-icons">edit</span>
@@ -61,18 +68,69 @@
               </td>
             </tr>
             <tr v-if="!loading && tournaments.length === 0">
-              <td colspan="7" class="text-center text-muted" style="padding:2rem;">No tournaments found.</td>
+              <td colspan="7" class="text-center text-muted" style="padding:2rem;">No se encontraron torneos.</td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- ── Inscribe Archer Modal ── -->
+      <Transition name="fade">
+        <div class="modal-overlay" v-if="showInscribeModal" @click.self="showInscribeModal = false">
+          <div class="modal-box">
+            <div class="modal-header">
+              <h3>
+                <span class="material-icons" style="vertical-align:middle;margin-right:0.4rem;color:var(--lol-gold);">person_add</span>
+                Inscribir Arquero
+              </h3>
+              <button class="modal-close" @click="showInscribeModal = false">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <Transition name="slide-up">
+                <div class="alert alert-error" v-if="inscribeError">
+                  <span class="material-icons">warning</span> {{ inscribeError }}
+                </div>
+              </Transition>
+              <Transition name="slide-up">
+                <div class="alert alert-success" v-if="inscribeSuccess">
+                  <span class="material-icons">check_circle</span> {{ inscribeSuccess }}
+                </div>
+              </Transition>
+
+              <p class="text-secondary" style="margin-bottom:1rem;">
+                Torneo: <strong class="text-gold">{{ inscribingT?.name }}</strong>
+              </p>
+
+              <div class="form-group">
+                <label class="form-label" for="inscribe-archer-select">Seleccionar Arquero</label>
+                <select id="inscribe-archer-select" class="form-input" v-model.number="inscribeArcherId">
+                  <option :value="null" disabled>— Selecciona un arquero —</option>
+                  <option v-for="a in archers" :key="a.archerId" :value="a.archerId">
+                    {{ a.name }} <span v-if="a.categoryName">({{ a.categoryName }})</span>
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-ghost" @click="showInscribeModal = false">Cancelar</button>
+              <button class="btn btn-gold" id="btn-confirm-inscribe" @click="doInscribe"
+                :disabled="saving || !inscribeArcherId">
+                <span class="material-icons btn-icon">how_to_reg</span>
+                {{ saving ? 'Inscribiendo...' : 'Inscribir' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
 
       <!-- Create/Edit Modal -->
       <Transition name="fade">
         <div class="modal-overlay" v-if="showModal" @click.self="showModal = false">
           <div class="modal-box">
             <div class="modal-header">
-              <h3>{{ editingT ? 'Edit Tournament' : 'New Tournament' }}</h3>
+              <h3>{{ editingT ? 'Editar Torneo' : 'Nuevo Torneo' }}</h3>
               <button class="modal-close" @click="showModal = false">
                 <span class="material-icons">close</span>
               </button>
@@ -84,37 +142,37 @@
                 </div>
               </Transition>
               <div class="form-group">
-                <label class="form-label" for="t-name">Tournament Name</label>
-                <input id="t-name" class="form-input" v-model="form.name" placeholder="Tournament name" />
+                <label class="form-label" for="t-name">Nombre del Torneo</label>
+                <input id="t-name" class="form-input" v-model="form.name" placeholder="Nombre del torneo" />
               </div>
               <div class="form-group">
-                <label class="form-label" for="t-category">Category</label>
+                <label class="form-label" for="t-category">Categoría</label>
                 <select id="t-category" class="form-input" v-model.number="form.categoryId">
-                  <option :value="null" disabled>Select a category</option>
+                  <option :value="null" disabled>Selecciona una categoría</option>
                   <option v-for="c in categories" :key="c.id_category ?? c.idCategory" :value="c.id_category ?? c.idCategory">{{ c.name }}</option>
                 </select>
               </div>
               <div class="grid-2">
                 <div class="form-group">
-                  <label class="form-label" for="t-start">Start Date</label>
+                  <label class="form-label" for="t-start">Fecha de Inicio</label>
                   <input id="t-start" class="form-input" type="date" v-model="form.startDate" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="t-end">End Date</label>
+                  <label class="form-label" for="t-end">Fecha de Fin</label>
                   <input id="t-end" class="form-input" type="date" v-model="form.endDate" />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
                   <input type="checkbox" v-model="form.active" id="t-active" />
-                  <span>Active</span>
+                  <span>Activo</span>
                 </label>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-ghost" @click="showModal = false">Cancel</button>
+              <button class="btn btn-ghost" @click="showModal = false">Cancelar</button>
               <button class="btn btn-gold" id="btn-save-tournament" @click="saveTournament" :disabled="saving">
-                {{ saving ? 'Saving...' : 'Save' }}
+                {{ saving ? 'Guardando...' : 'Guardar' }}
               </button>
             </div>
           </div>
@@ -126,19 +184,19 @@
         <div class="modal-overlay" v-if="showDeleteModal" @click.self="showDeleteModal = false">
           <div class="modal-box">
             <div class="modal-header">
-              <h3>Delete Tournament</h3>
+              <h3>Eliminar Torneo</h3>
               <button class="modal-close" @click="showDeleteModal = false">
                 <span class="material-icons">close</span>
               </button>
             </div>
             <div class="modal-body">
-              <p class="text-secondary">Delete <strong class="text-gold">{{ deletingT?.name }}</strong>?
-                All associated data will be removed.</p>
+              <p class="text-secondary">¿Eliminar <strong class="text-gold">{{ deletingT?.name }}</strong>?
+                Todos los datos asociados serán eliminados.</p>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-ghost" @click="showDeleteModal = false">Cancel</button>
+              <button class="btn btn-ghost" @click="showDeleteModal = false">Cancelar</button>
               <button class="btn btn-danger" id="btn-confirm-delete-tournament" @click="doDelete" :disabled="saving">
-                {{ saving ? 'Deleting...' : 'Delete' }}
+                {{ saving ? 'Eliminando...' : 'Eliminar' }}
               </button>
             </div>
           </div>
@@ -151,26 +209,33 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue'
 import { getTournaments, createTournament, updateTournament, deleteTournament } from '@/api/tournaments'
+import { getArchers } from '@/api/archers'
 import api from '@/api/axios'
 
-const tournaments    = ref([])
-const categories     = ref([])
-const loading        = ref(true)
-const showModal      = ref(false)
+const tournaments     = ref([])
+const categories      = ref([])
+const archers         = ref([])
+const loading         = ref(true)
+const showModal       = ref(false)
 const showDeleteModal = ref(false)
-const editingT       = ref(null)
-const deletingT      = ref(null)
-const saving         = ref(false)
-const modalError     = ref('')
+const showInscribeModal = ref(false)
+const editingT        = ref(null)
+const deletingT       = ref(null)
+const inscribingT     = ref(null)
+const inscribeArcherId = ref(null)
+const inscribeError   = ref('')
+const inscribeSuccess = ref('')
+const saving          = ref(false)
+const modalError      = ref('')
 
 const form = reactive({ name: '', categoryId: null, startDate: '', endDate: '', active: true })
 
 const today = new Date().toISOString().split('T')[0]
 
 function statusLabel(t) {
-  if (t.active) return 'Active'
-  if (t.endDate && t.endDate < today) return 'Finished'
-  return 'Upcoming'
+  if (t.active) return 'Activo'
+  if (t.endDate && t.endDate < today) return 'Finalizado'
+  return 'Próximo'
 }
 function statusClass(t) {
   if (t.active) return 'badge-success'
@@ -186,16 +251,16 @@ function formatDate(d) {
 async function load() {
   loading.value = true
   try {
-    const res = await getTournaments()
-    tournaments.value = res.data
+    const [tourRes, archerRes, catRes] = await Promise.all([
+      getTournaments(),
+      getArchers(),
+      api.get('/categories'),
+    ])
+    tournaments.value = tourRes.data
+    archers.value     = archerRes.data
+    categories.value  = catRes.data
   } catch (e) {
-    console.error('[AdminTournaments] failed to load tournaments:', e.message)
-  }
-  try {
-    const res = await api.get('/categories')
-    categories.value = res.data
-  } catch (e) {
-    console.warn('[AdminTournaments] categories unavailable:', e.message)
+    console.error('[AdminTournaments] load error:', e.message)
   }
   loading.value = false
 }
@@ -220,6 +285,14 @@ function openEdit(t) {
   showModal.value = true
 }
 
+function openInscribe(t) {
+  inscribingT.value    = t
+  inscribeArcherId.value = null
+  inscribeError.value  = ''
+  inscribeSuccess.value = ''
+  showInscribeModal.value = true
+}
+
 function confirmDelete(t) { deletingT.value = t; showDeleteModal.value = true }
 
 async function saveTournament() {
@@ -242,6 +315,23 @@ async function doDelete() {
     showDeleteModal.value = false
     await load()
   } catch { /* ignore */ } finally { saving.value = false }
+}
+
+async function doInscribe() {
+  inscribeError.value   = ''
+  inscribeSuccess.value = ''
+  saving.value = true
+  try {
+    await api.post('/inscriptions', {
+      archerId:     inscribeArcherId.value,
+      tournamentId: inscribingT.value.tournamentId,
+    })
+    const archerName = archers.value.find(a => a.archerId === inscribeArcherId.value)?.name || ''
+    inscribeSuccess.value = `${archerName} inscrito en ${inscribingT.value.name} exitosamente.`
+    inscribeArcherId.value = null
+  } catch (e) {
+    inscribeError.value = e.response?.data?.error || 'No se pudo inscribir al arquero. ¿Ya estaba inscrito?'
+  } finally { saving.value = false }
 }
 
 onMounted(load)
@@ -276,4 +366,11 @@ onMounted(load)
 .icon-btn .material-icons { font-size: 1rem; }
 .btn-icon { display: inline-flex; align-items: center; gap: 0.3rem; }
 .fw-bold { font-weight: 600; }
+
+.alert-success {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(10,200,185,0.12); border: 1px solid rgba(10,200,185,0.3);
+  color: #0ac8b9; border-radius: 6px; padding: 0.6rem 0.9rem;
+  font-size: 0.82rem; margin-bottom: 1rem;
+}
 </style>

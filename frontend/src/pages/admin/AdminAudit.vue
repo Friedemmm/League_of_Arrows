@@ -4,14 +4,14 @@
 
       <!-- ── Page header ── -->
       <div class="admin-page-header">
-        <button class="btn-back" id="btn-back-audit" @click="$router.back()">
-          <span class="material-icons">arrow_back</span> Back
+        <button class="btn-back" id="btn-back-audit" @click="$router.push('/dashboard')">
+          <span class="material-icons">arrow_back</span> Volver
         </button>
         <h1 class="page-title">
           <span class="material-icons page-title-icon">policy</span>
-          Audit Log
+          Registro de Auditoría
         </h1>
-        <p class="page-subtitle">Read-only record of all score modifications made by administrators.</p>
+        <p class="page-subtitle">Registro de solo lectura de todas las modificaciones de puntajes realizadas por administradores.</p>
         <hr class="page-rule" />
       </div>
 
@@ -21,26 +21,26 @@
           <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0;">
             <label class="form-label" for="audit-filter-archer">
               <span class="material-icons" style="font-size:0.9rem;vertical-align:middle;">person_search</span>
-              Filter by Archer
+              Filtrar por Arquero
             </label>
             <select id="audit-filter-archer" class="form-input" v-model.number="filterArcherId">
-              <option :value="null">All archers</option>
+              <option :value="null">Todos los arqueros</option>
               <option v-for="a in archers" :key="a.archerId" :value="a.archerId">{{ a.name }}</option>
             </select>
           </div>
           <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0;">
             <label class="form-label" for="audit-filter-tournament">
               <span class="material-icons" style="font-size:0.9rem;vertical-align:middle;">search</span>
-              Filter by Tournament
+              Filtrar por Torneo
             </label>
             <select id="audit-filter-tournament" class="form-input" v-model.number="filterTournamentId">
-              <option :value="null">All tournaments</option>
+              <option :value="null">Todos los torneos</option>
               <option v-for="t in tournaments" :key="t.tournamentId" :value="t.tournamentId">{{ t.name }}</option>
             </select>
           </div>
           <div>
             <button class="btn btn-ghost btn-sm" id="btn-clear-audit-filter" @click="clearFilters">
-              <span class="material-icons" style="font-size:1rem;">filter_alt_off</span> Clear
+              <span class="material-icons" style="font-size:1rem;">filter_alt_off</span> Limpiar
             </button>
           </div>
         </div>
@@ -53,19 +53,19 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Archer</th>
-              <th>Tournament</th>
-              <th>Old Score</th>
-              <th>New Score</th>
-              <th>Modified By</th>
-              <th>Date</th>
+              <th>Arquero</th>
+              <th>Torneo</th>
+              <th>Puntaje Anterior</th>
+              <th>Puntaje Nuevo</th>
+              <th>Modificado Por</th>
+              <th>Fecha</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="log in filtered" :key="log.idAudit" :id="`audit-row-${log.idAudit}`">
               <td class="text-muted">#{{ log.idAudit }}</td>
-              <td>{{ archerName(log.idArcher) }}</td>
-              <td>{{ tournamentName(log.idTournament) }}</td>
+              <td>{{ log.archerName || `#${log.idArcher}` }}</td>
+              <td>{{ log.tournamentName || `#${log.idTournament}` }}</td>
               <td><span class="badge badge-muted">{{ log.oldScore }}</span></td>
               <td>
                 <span class="badge" :class="log.newScore > log.oldScore ? 'badge-success' : 'badge-danger'">
@@ -81,7 +81,7 @@
               <td class="text-muted" style="font-size:0.78rem;">{{ formatDate(log.modifiedAt) }}</td>
             </tr>
             <tr v-if="filtered.length === 0">
-              <td colspan="7" class="text-center text-muted" style="padding:2rem;">No audit records found.</td>
+              <td colspan="7" class="text-center text-muted" style="padding:2rem;">No se encontraron registros de auditoría.</td>
             </tr>
           </tbody>
         </table>
@@ -127,10 +127,12 @@ onMounted(async () => {
       getArchers(),
       getTournaments(),
     ])
-    auditLogs.value   = auditRes.data
+    auditLogs.value   = auditRes.data   // now has archerName & tournamentName embedded
     archers.value     = archerRes.data
     tournaments.value = tourRes.data
-  } catch { /* endpoint may not be exposed */ } finally { loading.value = false }
+  } catch (e) {
+    console.error('[AdminAudit] load error:', e.message)
+  } finally { loading.value = false }
 })
 </script>
 

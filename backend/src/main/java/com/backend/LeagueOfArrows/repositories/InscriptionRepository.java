@@ -19,8 +19,8 @@ public class InscriptionRepository {
     private final RowMapper<InscriptionEntity> inscriptionEntityRowMapper = (rs, rowNum) -> {
         InscriptionEntity inscription = new InscriptionEntity();
         inscription.setInscriptionId(rs.getLong("id_inscription"));
-        inscription.setTournamentId(rs.getLong("id_archer"));
-        inscription.setArcherId(rs.getLong("id_tournament"));
+        inscription.setArcherId(rs.getLong("id_archer"));
+        inscription.setTournamentId(rs.getLong("id_tournament"));
         inscription.setScore(rs.getInt("score"));
         return inscription;
     };
@@ -39,11 +39,11 @@ public class InscriptionRepository {
     }
 
     public Long save(Long archerId, Long tournamentId) {
-        return jdbc.queryForObject("INSERT INTO inscriptions (id_archer, id_tournament, score) VALUES (?, ?, 0) RETURNING id_inscripcion", Long.class, archerId, tournamentId);
+        return jdbc.queryForObject("INSERT INTO inscriptions (id_archer, id_tournament, score) VALUES (?, ?, 0) RETURNING id_inscription", Long.class, archerId, tournamentId);
     }
 
     public int deteleById(Long id) {
-        return jdbc.update("DELETE FROM inscriptions WHERE id_inscriptions = ?", id);
+        return jdbc.update("DELETE FROM inscriptions WHERE id_inscription = ?", id);
     }
 
 }

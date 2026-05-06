@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/inscriptions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/inscriptions/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/rounds/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,  "/api/audit").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,  "/api/tournaments/*/rankings").authenticated()
 
 
                         // Cualquier otra ruta requiere autenticacion

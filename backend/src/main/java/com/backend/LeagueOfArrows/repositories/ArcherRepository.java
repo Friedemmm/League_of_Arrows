@@ -103,13 +103,15 @@ public class ArcherRepository {
         SELECT
             a.id_archer,
             a.name,
-            SUM(i.score) AS monthly_score
-        FROM inscriptions i
-        INNER JOIN archers a      ON i.id_archer     = a.id_archer
-        INNER JOIN tournaments t  ON i.id_tournament = t.id_tournament
+            SUM(ar.score) AS monthly_score
+        FROM rounds ro
+        INNER JOIN arrows       ar ON ar.id_round     = ro.id_round
+        INNER JOIN archers      a  ON a.id_archer      = ro.id_archer
+        INNER JOIN tournaments  t  ON t.id_tournament  = ro.id_tournament
         WHERE t.start_date >= NOW() - INTERVAL '1 month'
         GROUP BY a.id_archer, a.name
         ORDER BY monthly_score DESC
+        LIMIT 10
         """;
         return jdbc.query(sql, (rs, n) -> new TopArcherDTO(
                 rs.getLong("id_archer"),
@@ -121,15 +123,20 @@ public class ArcherRepository {
     public List<LeaderboardDTO> findHistoricalLeaderboard() {
         String sql = """
         SELECT
-            posicion_global,
-            id_archer,
-            nombre,
-            torneos_jugados,
-            flechas_lanzadas,
-            puntaje_total,
-            promedio_por_flecha
-        FROM mv_leaderboard_historico
-        ORDER BY posicion_global ASC
+            CAST(ROW_NUMBER() OVER (ORDER BY ROUND(AVG(ar.score)::NUMERIC, 4) DESC) AS INT)
+                AS posicion_global,
+            a.id_archer,
+            a.name            AS nombre,
+            COUNT(DISTINCT r.id_tournament) AS torneos_jugados,
+            COUNT(ar.id_arrow)              AS flechas_lanzadas,
+            SUM(ar.score)                   AS puntaje_total,
+            ROUND(AVG(ar.score)::NUMERIC, 4) AS promedio_por_flecha
+        FROM archers a
+        JOIN rounds r  ON r.id_archer = a.id_archer
+        JOIN arrows ar ON ar.id_round  = r.id_round
+        GROUP BY a.id_archer, a.name
+        ORDER BY promedio_por_flecha DESC
+        LIMIT 50
         """;
         return jdbc.query(sql, (rs, n) -> new LeaderboardDTO(
                 rs.getInt("posicion_global"),

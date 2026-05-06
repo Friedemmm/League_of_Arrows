@@ -23,7 +23,7 @@
               :class="{ active: tab === 'monthly' }"
               @click="tab = 'monthly'"
             >
-              Mejores del Mes
+              Top 5 mejores del Mes
             </button>
           </div>
         </div>

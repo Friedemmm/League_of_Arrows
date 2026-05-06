@@ -4,14 +4,14 @@
 
       <!-- Page header -->
       <div class="admin-page-header">
-        <button class="btn-back" id="btn-back-scoring" @click="$router.back()">
-          <span class="material-icons">arrow_back</span> Back
+        <button class="btn-back" id="btn-back-scoring" @click="$router.push('/dashboard')">
+          <span class="material-icons">arrow_back</span> Volver
         </button>
         <h1 class="page-title">
           <span class="material-icons page-title-icon">sports_score</span>
-          Score Registration
+          Registro de Puntajes
         </h1>
-        <p class="page-subtitle">Register round scores for an archer in an active tournament.</p>
+        <p class="page-subtitle">Registra los puntajes de una ronda para un arquero en un torneo activo.</p>
         <hr class="page-rule" />
       </div>
 
@@ -35,34 +35,34 @@
           <div class="grid-2">
             <!-- Tournament dropdown — only active ones -->
             <div class="form-group">
-              <label class="form-label" for="scoring-tournament">Tournament</label>
+              <label class="form-label" for="scoring-tournament">Torneo</label>
               <select id="scoring-tournament" class="form-input" v-model.number="form.tournamentId">
-                <option :value="null" disabled>Select a tournament</option>
+                <option :value="null" disabled>Selecciona un torneo</option>
                 <option v-for="t in activeTournaments" :key="t.tournamentId" :value="t.tournamentId">
                   {{ t.name }}
                 </option>
               </select>
-              <span v-if="activeTournaments.length === 0" class="hint-text">No active tournaments found.</span>
+              <span v-if="activeTournaments.length === 0" class="hint-text">No hay torneos activos.</span>
             </div>
 
             <!-- Archer dropdown -->
             <div class="form-group">
-              <label class="form-label" for="scoring-archer">Archer</label>
+              <label class="form-label" for="scoring-archer">Arquero</label>
               <select id="scoring-archer" class="form-input" v-model.number="form.archerId">
-                <option :value="null" disabled>Select an archer</option>
+                <option :value="null" disabled>Selecciona un arquero</option>
                 <option v-for="a in archers" :key="a.archerId" :value="a.archerId">{{ a.name }}</option>
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="scoring-round">Round Number</label>
+            <label class="form-label" for="scoring-round">Número de Ronda</label>
             <input id="scoring-round" class="form-input" type="number"
-              v-model.number="form.roundNumber" placeholder="Round (e.g. 1)" min="1" style="max-width:160px;" />
+              v-model.number="form.roundNumber" placeholder="Ronda (ej. 1)" min="1" style="max-width:160px;" />
           </div>
 
           <div class="form-group">
-            <label class="form-label">Arrow Scores (0–10 each, or M for miss)</label>
+            <label class="form-label">Puntajes de Flechas (0–10 por flecha, o M para fallo)</label>
             <div class="arrow-inputs">
               <input
                 v-for="(_, i) in arrowCount"
@@ -80,10 +80,10 @@
             </div>
             <div class="arrow-controls mt-1">
               <button class="btn btn-ghost btn-sm" id="btn-add-arrow" @click="addArrow">
-                <span class="material-icons" style="font-size:1rem;">add</span> Arrow
+                <span class="material-icons" style="font-size:1rem;">add</span> Flecha
               </button>
               <button class="btn btn-ghost btn-sm" id="btn-remove-arrow" @click="removeArrow" :disabled="arrowCount <= 1">
-                <span class="material-icons" style="font-size:1rem;">remove</span> Arrow
+                <span class="material-icons" style="font-size:1rem;">remove</span> Flecha
               </button>
             </div>
           </div>
@@ -91,7 +91,7 @@
           <!-- Score Preview -->
           <div class="score-preview lol-card mt-2" v-if="hasScores">
             <div class="preview-row">
-              <span class="preview-label">Round Total</span>
+              <span class="preview-label">Total de Ronda</span>
               <span class="preview-value">{{ roundTotal }}</span>
             </div>
             <div class="arrow-bubbles">
@@ -104,11 +104,11 @@
 
           <div class="modal-footer" style="padding:1.5rem 0 0;">
             <button class="btn btn-ghost" @click="resetForm" id="btn-reset-scoring">
-              <span class="material-icons btn-icon">restart_alt</span> Reset
+              <span class="material-icons btn-icon">restart_alt</span> Limpiar
             </button>
             <button class="btn btn-gold" @click="submitScore" :disabled="submitting" id="btn-submit-score">
               <span class="material-icons btn-icon">send</span>
-              {{ submitting ? 'Submitting...' : 'Submit Round' }}
+              {{ submitting ? 'Registrando...' : 'Registrar Ronda' }}
             </button>
           </div>
         </template>

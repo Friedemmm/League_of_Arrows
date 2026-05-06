@@ -4,19 +4,19 @@
 
       <!-- Page header -->
       <div class="admin-page-header">
-        <button class="btn-back" id="btn-back-archers" @click="$router.back()">
+        <button class="btn-back" id="btn-back-archers" @click="$router.push('/dashboard')">
           <span class="material-icons">arrow_back</span> Back
         </button>
         <div class="header-row">
           <div>
             <h1 class="page-title">
               <span class="material-icons page-title-icon">group</span>
-              Manage Archers
+              Gestionar Arqueros
             </h1>
-            <p class="page-subtitle">Create, edit and remove archer profiles.</p>
+            <p class="page-subtitle">Crea, edita y elimina perfiles de arqueros.</p>
           </div>
           <button class="btn btn-gold" id="btn-add-archer" @click="openCreate">
-            <span class="material-icons btn-icon">person_add</span> New Archer
+            <span class="material-icons btn-icon">person_add</span> Nuevo Arquero
           </button>
         </div>
         <hr class="page-rule" />
@@ -26,7 +26,7 @@
       <div class="search-bar mb-3">
         <span class="material-icons search-icon">search</span>
         <input id="search-archers" class="form-input search-input" type="text"
-          v-model="search" placeholder="Search by name..." />
+          v-model="search" placeholder="Buscar por nombre..." />
       </div>
 
       <div v-if="loading" class="loading-center"><div class="spinner"></div></div>
@@ -36,9 +36,9 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Actions</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +60,7 @@
               </td>
             </tr>
             <tr v-if="!loading && filtered.length === 0">
-              <td colspan="4" class="text-center text-muted" style="padding:2rem;">No archers found.</td>
+              <td colspan="4" class="text-center text-muted" style="padding:2rem;">No se encontraron arqueros.</td>
             </tr>
           </tbody>
         </table>
@@ -71,7 +71,7 @@
         <div class="modal-overlay" v-if="showModal" @click.self="showModal = false">
           <div class="modal-box">
             <div class="modal-header">
-              <h3>{{ editingArcher ? 'Edit Archer' : 'New Archer' }}</h3>
+              <h3>{{ editingArcher ? 'Editar Arquero' : 'Nuevo Arquero' }}</h3>
               <button class="modal-close" @click="showModal = false">
                 <span class="material-icons">close</span>
               </button>
@@ -83,29 +83,29 @@
                 </div>
               </Transition>
               <div class="form-group">
-                <label class="form-label" for="archer-name">Name</label>
-                <input id="archer-name" class="form-input" v-model="form.name" placeholder="Full name" />
+                <label class="form-label" for="archer-name">Nombre</label>
+                <input id="archer-name" class="form-input" v-model="form.name" placeholder="Nombre completo" />
               </div>
               <div class="form-group" v-if="!editingArcher">
-                <label class="form-label" for="archer-email">Email</label>
-                <input id="archer-email" class="form-input" type="email" v-model="form.email" placeholder="email@example.com" />
+                <label class="form-label" for="archer-email">Correo</label>
+                <input id="archer-email" class="form-input" type="email" v-model="form.email" placeholder="correo@ejemplo.com" />
               </div>
               <div class="form-group" v-if="!editingArcher">
-                <label class="form-label" for="archer-password">Password</label>
+                <label class="form-label" for="archer-password">Contraseña</label>
                 <input id="archer-password" class="form-input" type="password" v-model="form.password" placeholder="••••••••" />
               </div>
               <div class="form-group">
-                <label class="form-label" for="archer-category">Category</label>
+                <label class="form-label" for="archer-category">Categoría</label>
                 <select id="archer-category" class="form-input" v-model.number="form.categoryId">
-                  <option :value="null" disabled>Select a category</option>
+                  <option :value="null" disabled>Selecciona una categoría</option>
                   <option v-for="c in categories" :key="c.id_category ?? c.idCategory" :value="c.id_category ?? c.idCategory">{{ c.name }}</option>
                 </select>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-ghost" @click="showModal = false">Cancel</button>
+              <button class="btn btn-ghost" @click="showModal = false">Cancelar</button>
               <button class="btn btn-gold" id="btn-save-archer" @click="saveArcher" :disabled="saving">
-                {{ saving ? 'Saving...' : 'Save' }}
+                {{ saving ? 'Guardando...' : 'Guardar' }}
               </button>
             </div>
           </div>
@@ -117,20 +117,20 @@
         <div class="modal-overlay" v-if="showDeleteModal" @click.self="showDeleteModal = false">
           <div class="modal-box">
             <div class="modal-header">
-              <h3>Delete Archer</h3>
+              <h3>Eliminar Arquero</h3>
               <button class="modal-close" @click="showDeleteModal = false">
                 <span class="material-icons">close</span>
               </button>
             </div>
             <div class="modal-body">
-              <p class="text-secondary">Are you sure you want to delete
-                <strong class="text-gold">{{ deletingArcher?.name }}</strong>? This cannot be undone.
+              <p class="text-secondary">¿Eliminar a
+                <strong class="text-gold">{{ deletingArcher?.name }}</strong>? Esta acción no se puede deshacer.
               </p>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-ghost" @click="showDeleteModal = false">Cancel</button>
+              <button class="btn btn-ghost" @click="showDeleteModal = false">Cancelar</button>
               <button class="btn btn-danger" id="btn-confirm-delete-archer" @click="doDelete" :disabled="saving">
-                {{ saving ? 'Deleting...' : 'Delete' }}
+                {{ saving ? 'Eliminando...' : 'Eliminar' }}
               </button>
             </div>
           </div>

@@ -4,14 +4,14 @@
 
       <!-- Page header (subtitle strictly above the rule) -->
       <div class="page-header">
-        <button class="btn-back" id="btn-back-history" @click="$router.back()">
-          <span class="material-icons">arrow_back</span> Back
+        <button class="btn-back" id="btn-back-history" @click="$router.push('/dashboard')">
+          <span class="material-icons">arrow_back</span> Volver
         </button>
         <h1 class="page-title">
           <span class="material-icons page-title-icon">history</span>
-          Tournament History
+          Historial de Torneos
         </h1>
-        <p class="page-subtitle">Your personal performance record across all competitions.</p>
+        <p class="page-subtitle">Tu registro personal de rendimiento en todas las competiciones.</p>
         <hr class="page-rule" />
       </div>
 
@@ -22,19 +22,19 @@
         <div class="stat-grid mb-4">
           <div class="stat-card">
             <div class="stat-value">{{ history.length }}</div>
-            <div class="stat-label">Tournaments</div>
+            <div class="stat-label">Torneos</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">{{ totalScore }}</div>
-            <div class="stat-label">Total Points</div>
+            <div class="stat-label">Puntos Totales</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">{{ bestPosition }}</div>
-            <div class="stat-label">Best Position</div>
+            <div class="stat-label">Mejor Posición</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">{{ avgScore }}</div>
-            <div class="stat-label">Avg Score</div>
+            <div class="stat-label">Prom. Puntaje</div>
           </div>
         </div>
 
@@ -66,8 +66,8 @@
         </div>
 
         <div v-else class="empty-state lol-card text-center" style="padding:3rem;">
-          <p class="text-muted">You haven't entered any tournaments yet.</p>
-          <RouterLink to="/tournaments" class="btn btn-gold mt-2">Browse Tournaments</RouterLink>
+          <p class="text-muted">Aún no has participado en ningún torneo.</p>
+          <RouterLink to="/tournaments" class="btn btn-gold mt-2">Ver Torneos</RouterLink>
         </div>
       </template>
     </div>

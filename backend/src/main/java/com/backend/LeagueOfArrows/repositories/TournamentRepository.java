@@ -56,23 +56,47 @@ public class TournamentRepository {
     }
 
     public List<PodiumDTO> findPodiumByTournamentId(Long tournamentId) {
+        // 1st: use pre-calculated rankings (populated for finished tournaments)
+        // 2nd: fallback to live calculation from arrows for active tournaments
         String sql = """
-        SELECT
-            r.position,
-            a.id_archer,
-            a.name,
-            r.total_score
-        FROM rankings r
-        INNER JOIN archers a ON r.id_archer = a.id_archer
-        WHERE r.id_tournament = ?
-          AND r.position <= 3
-        ORDER BY r.position ASC
+        WITH ranked AS (
+            -- Pre-calculated rankings (finished tournaments)
+            SELECT
+                r.position,
+                r.id_archer,
+                a.name,
+                r.total_score
+            FROM rankings r
+            INNER JOIN archers a ON r.id_archer = a.id_archer
+            WHERE r.id_tournament = ?
+
+            UNION ALL
+
+            -- Live calculation from arrows (active / no rankings yet)
+            SELECT
+                CAST(ROW_NUMBER() OVER (ORDER BY SUM(ar.score) DESC) AS INT) AS position,
+                ro.id_archer,
+                a.name,
+                SUM(ar.score) AS total_score
+            FROM rounds ro
+            INNER JOIN arrows ar ON ar.id_round = ro.id_round
+            INNER JOIN archers a ON a.id_archer = ro.id_archer
+            WHERE ro.id_tournament = ?
+              AND NOT EXISTS (
+                  SELECT 1 FROM rankings r2 WHERE r2.id_tournament = ?
+              )
+            GROUP BY ro.id_archer, a.name
+        )
+        SELECT DISTINCT ON (position) position, id_archer, name, total_score
+        FROM ranked
+        WHERE position <= 3
+        ORDER BY position ASC
         """;
         return jdbc.query(sql, (rs, n) -> new PodiumDTO(
                 rs.getInt("position"),
                 rs.getLong("id_archer"),
                 rs.getString("name"),
                 rs.getInt("total_score")
-        ), tournamentId);
+        ), tournamentId, tournamentId, tournamentId);
     }
 }

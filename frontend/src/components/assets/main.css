@@ -103,8 +103,8 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Dark navy base — aurora overlay handled by App.vue */
-  background: #061018;
+  /* Dark navy base color comes from aurora-root in App.vue */
+  background: transparent;
 }
 
 #app {

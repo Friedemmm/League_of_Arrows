@@ -16,7 +16,7 @@
 html, body {
   width: 100%;
   min-height: 100vh;
-  background: #010A13;
+  background: transparent;   /* aurora-root in App.vue provides the base color */
   color: #F0E6D2;
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }

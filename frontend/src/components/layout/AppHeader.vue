@@ -95,16 +95,16 @@
           <!-- Admin-only links -->
           <template v-if="isAdmin">
             <RouterLink to="/admin/archers" class="dp-item" @click.stop="userOpen = false" id="sidebar-manage-archers">
-              <span class="material-icons dp-icon">group</span> Manage Archers
+              <span class="material-icons dp-icon">group</span> Gestionar Arqueros
             </RouterLink>
             <RouterLink to="/admin/tournaments" class="dp-item" @click.stop="userOpen = false" id="sidebar-manage-events">
-              <span class="material-icons dp-icon">emoji_events</span> Manage Events
+              <span class="material-icons dp-icon">emoji_events</span> Gestionar Eventos
             </RouterLink>
             <RouterLink to="/admin/scoring" class="dp-item" @click.stop="userOpen = false" id="sidebar-score-entry">
-              <span class="material-icons dp-icon">sports_score</span> Score Registration
+              <span class="material-icons dp-icon">sports_score</span> Registro de Puntajes
             </RouterLink>
             <RouterLink to="/admin/audit" class="dp-item" @click.stop="userOpen = false" id="sidebar-audit">
-              <span class="material-icons dp-icon">policy</span> Audit Table
+              <span class="material-icons dp-icon">policy</span> Auditoría
             </RouterLink>
           </template>
 
@@ -143,13 +143,13 @@ const userInitials = computed(() => {
 
 const guestNavItems = [
   { to: '/',            label: 'Inicio',   id: 'inicio' },
-  { to: '/leaderboard', label: 'Rankings',  id: 'rankings' },
+  { to: '/leaderboard', label: 'Leaderboard', id: 'rankings' },
   { to: '/tournaments', label: 'Eventos',   id: 'eventos' },
 ]
 
 const navItems = [
   { to: '/',            label: 'Inicio',    id: 'inicio' },
-  { to: '/leaderboard', label: 'Rankings',  id: 'rankings' },
+  { to: '/leaderboard', label: 'Leaderboard', id: 'rankings' },
   { to: '/tournaments', label: 'Eventos',   id: 'eventos' },
 ]
 
@@ -157,7 +157,7 @@ const adminItems = [
   { to: '/admin/archers',     label: 'Arqueros',    icon: '🏹', id: 'arqueros' },
   { to: '/admin/tournaments', label: 'Torneos',     icon: '⚔',  id: 'torneos' },
   { to: '/admin/scoring',     label: 'Puntajes',    icon: '◎',  id: 'puntajes' },
-  { to: '/admin/ranking',     label: 'Rankings',    icon: '◆',  id: 'rankings' },
+  { to: '/admin/ranking',     label: 'Leaderboard',    icon: '◆',  id: 'rankings' },
   { to: '/admin/categories',  label: 'Categorías',  icon: '⊞',  id: 'categorias' },
   { to: '/admin/audit',       label: 'Auditoría',   icon: '📋', id: 'auditoria' },
 ]
@@ -240,15 +240,15 @@ function handleLogout() {
   padding: 0 1.2rem;
   line-height: var(--header-height);
   font-family: 'Cinzel', serif;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.4px;
   color: #A09B8C;
   text-decoration: none;
   cursor: pointer;
   position: relative;
-  transition: color 0.3s;        /* NO transform in transition */
+  transition: color 0.3s;  
   white-space: nowrap;
   user-select: none;
 }

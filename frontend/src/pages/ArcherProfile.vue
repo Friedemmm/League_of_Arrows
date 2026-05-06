@@ -3,12 +3,12 @@
     <div class="container" style="max-width:700px;">
 
       <div class="page-header">
-        <button class="btn-back" id="btn-back-profile" @click="$router.back()">
-          <span class="material-icons">arrow_back</span> Back
+        <button class="btn-back" id="btn-back-profile" @click="$router.push('/dashboard')">
+          <span class="material-icons">arrow_back</span> Volver
         </button>
         <h1 class="page-title">
           <span class="material-icons page-title-icon">person</span>
-          Archer Profile
+          Perfil de Arquero
         </h1>
         <hr class="page-rule" />
       </div>
@@ -26,7 +26,7 @@
           <p class="profile-email">{{ auth.user?.email }}</p>
           <div class="profile-badges">
             <span class="badge" :class="auth.isAdmin ? 'badge-gold' : 'badge-blue'">
-              {{ auth.isAdmin ? 'Administrator' : 'Archer' }}
+              {{ auth.isAdmin ? 'Administrador' : 'Arquero' }}
             </span>
           </div>
         </div>
@@ -34,28 +34,24 @@
 
       <!-- Account Details -->
       <div class="lol-card mt-2">
-        <h3 class="detail-section-title">Account Details</h3>
+        <h3 class="detail-section-title">Datos de Cuenta</h3>
         <div class="detail-grid">
           <div class="detail-item">
-            <span class="detail-label">Email</span>
+            <span class="detail-label">Correo</span>
             <span class="detail-value">{{ auth.user?.email }}</span>
           </div>
           <div class="detail-item">
-            <span class="detail-label">Role</span>
-            <span class="detail-value">{{ auth.isAdmin ? 'Administrator' : 'Arquero' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">User ID</span>
-            <span class="detail-value">#{{ auth.user?.userId }}</span>
+            <span class="detail-label">Rol</span>
+            <span class="detail-value">{{ auth.isAdmin ? 'Administrador' : 'Arquero' }}</span>
           </div>
         </div>
       </div>
 
       <!-- Navigation shortcuts -->
       <div class="profile-actions mt-3">
-        <RouterLink to="/history"  class="btn btn-outline" id="profile-btn-history">View History</RouterLink>
+        <RouterLink to="/history"  class="btn btn-outline" id="profile-btn-history">Ver Historial</RouterLink>
         <RouterLink to="/leaderboard" class="btn btn-outline" id="profile-btn-leaderboard">Leaderboard</RouterLink>
-        <button class="btn btn-danger" id="profile-btn-logout" @click="handleLogout">Logout</button>
+        <button class="btn btn-danger" id="profile-btn-logout" @click="handleLogout">Cerrar Sesión</button>
       </div>
     </div>
   </div>
